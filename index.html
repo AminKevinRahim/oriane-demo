@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Oriane — You point, it finds</title>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="logo.svg"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--paper:#F5F4F0;--ink:#111110;--soft:#6B6A66;--mute:#9C9A94;--hair:#E3E1DB;--sig:#FF4F00;--card:#fff;
   --e:cubic-bezier(.7,0,.2,1);--o:cubic-bezier(.2,.9,.3,1);
@@ -32,7 +32,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .t .info{position:absolute;inset:0;opacity:0;transition:opacity .5s;pointer-events:none;color:#fff}
 .t.card .info{opacity:1}
 .t .scrim{position:absolute;inset:auto 0 0;height:56%;background:linear-gradient(to top,rgba(10,10,9,.82),rgba(10,10,9,.35) 55%,rgba(10,10,9,0))}
-.t .top{position:absolute;left:10px;top:10px;right:10px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.t .top{position:absolute;left:8px;top:8px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:3px 8px;border-radius:999px;background:rgba(10,10,9,.42);backdrop-filter:blur(6px)}
+.t.card{cursor:pointer}
 .t .top svg{width:14px;height:14px;flex:none}
 .t .tag{position:absolute;left:10px;right:10px;bottom:40px;font-size:12px;line-height:1.35}
 .t .tag b{display:inline-block;font:500 10.5px 'Geist Mono';letter-spacing:.06em;background:var(--sig);color:#fff;padding:2px 6px;border-radius:4px;margin-bottom:5px}
@@ -83,8 +84,8 @@ h1 .l1{display:block;transition:opacity .5s,filter .5s}
 .bar .go{width:40px;height:40px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center;flex:none;transition:transform .15s,background .2s}
 .bar .go:active,.bar .go.press{transform:scale(.92)}
 .bar .go svg{width:16px;height:16px}
-.sugs{display:flex;justify-content:center;gap:8px;margin-top:14px;transition:opacity .4s}
-.sug{height:30px;padding:0 12px;border-radius:999px;font-size:13px;color:var(--soft);background:rgba(255,255,255,.6);box-shadow:0 0 0 1px var(--hair);transition:all .2s;backdrop-filter:blur(6px)}
+.sugs{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:14px;transition:opacity .4s}
+.sug{height:30px;padding:0 12px;white-space:nowrap;border-radius:999px;font-size:13px;color:var(--soft);background:rgba(255,255,255,.6);box-shadow:0 0 0 1px var(--hair);transition:all .2s;backdrop-filter:blur(6px)}
 .sug:hover{color:var(--ink);background:#fff}
 .docked .barwrap{top:calc(100% - 92px);width:720px}
 .fb{position:fixed;left:0;right:0;bottom:0;height:150px;z-index:25;pointer-events:none;background:linear-gradient(to top,var(--paper) 30%,rgba(245,244,240,0));opacity:0;transition:opacity .8s}
@@ -189,12 +190,14 @@ function head(id) {
   if (old) { old.className = 'out'; setTimeout(() => old.remove(), 560); }
   const n = document.createElement('span'); n.className = 'in';
   n.innerHTML = `${q.head}<span class="th"><img src="media/${v.id}/thumb.webp" alt=""></span>`; $('slot').appendChild(n);
-  $('q').placeholder = 'Search for videos that ' + q.head.replace(/[“”]/g, '');
+  $('q').placeholder = 'Find every video that ' + q.head.replace(/[“”]/g, '');
   theme = id;
 }
 
 // ---------- the search ----------
-async function ghost(text) { const q = $('q'); q.value = ''; for (const c of text) { if (!autoOn) return false; q.value += c; await wait(24 + Math.random() * 22); } return true; }
+const cut = (s, n) => { s = (s || '').replace(/\s+/g, ' ').trim(); if (s.length <= n) return s; const c = s.slice(0, n); return c.slice(0, Math.max(c.lastIndexOf(' '), n * .6 | 0)).replace(/[\s#@,.:;—-]+$/, '') + '…'; };
+let ghosting = false;
+async function ghost(text) { const q = $('q'); q.value = ''; ghosting = true; for (const c of text) { if (!autoOn) { ghosting = false; return false; } q.value += c; await wait(24 + Math.random() * 22); } ghosting = false; return true; }
 async function run(id) {
   if (mode !== 'wall') return; mode = 'burst';
   const q = Q[id], data = DATA.queries.find(x => x.id === id), prompt = data.prompt;
@@ -219,12 +222,14 @@ async function run(id) {
   catchInto(id, data);
 }
 function slots(n) {
-  const cols = Math.max(3, Math.min(8, Math.floor((W() - 120) / 212))), cw = Math.min(200, (W() - 120 - (cols - 1) * 16) / cols), chh = cw * 16 / 9;
-  const x0 = (W() - (cols * cw + (cols - 1) * 16)) / 2, y0 = 318;
+  // every result fits on one screen: two rows, cards shrink to the viewport (body never scrolls)
+  const cols = Math.max(1, Math.min(8, Math.ceil(n / 2))), rows = Math.ceil(n / cols), y0 = 318, room = innerHeight - y0 - 96;
+  const cw = Math.max(80, Math.min(200, (W() - 120 - (cols - 1) * 16) / cols, ((room - (rows - 1) * 16) / rows) * 9 / 16)), chh = cw * 16 / 9;
+  const x0 = (W() - (cols * cw + (cols - 1) * 16)) / 2;
   return Array.from({ length: n }, (_, i) => ({ x: x0 + (i % cols) * (cw + 16), y: y0 + Math.floor(i / cols) * (chh + 16), w: cw, h: chh }));
 }
 function cardHTML(v, id) {
-  const said = v.said && v.said.text, label = id === 'Q3' ? '<b>SEEN</b><br>Air Jordan · visual match' : said ? `<b>SAID ${mmss(v.said.t0)}</b><br>“${said.length > 44 ? said.slice(0, 42) + '…' : said}”` : `<b>MATCHED</b><br>${v.cap.slice(0, 40)}`;
+  const said = v.said && v.said.text, label = id === 'Q3' ? '<b>FOUND</b><br>by visual search' : said ? `<b>SAID ${mmss(v.said.t0)}</b><br>“${said.length > 44 ? said.slice(0, 42) + '…' : said}”` : `<b>MATCHED</b><br>${cut(v.cap, 40)}`;
   return `<div class="info"><div class="scrim"></div><div class="top">${v.p === 'tiktok' ? TT : IG}${v.views ? fmt(v.views) : ''}</div>
     <div class="scrub">${(v.frames.length ? ['thumb', ...v.frames] : ['thumb']).map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>
     <div class="tag">${label}</div><div class="who"><img src="media/pfp/${v.h}.webp" alt="">@${v.h}</div></div>`;
@@ -254,6 +259,7 @@ async function catchInto(id, data) {
 }
 function wallFade(a) { fadeTarget = a; }
 function bindScrub(t) {
+  t.el.onclick = () => { location.href = 'demo.html?tour=0#/video/' + t.cv.id; };
   const fr = ['thumb', ...t.cv.frames], bars = t.el.querySelectorAll('.scrub i'); if (fr.length < 2) return;
   fr.forEach(f => { const i = new Image(); i.src = `media/${t.cv.id}/${f}.webp`; });
   t.el.onpointermove = e => { const r = t.el.getBoundingClientRect(), k = Math.min(fr.length - 1, Math.floor((e.clientX - r.left) / r.width * fr.length)); t.img.src = `media/${t.cv.id}/${fr[k]}.webp`; bars.forEach((b, j) => b.classList.toggle('on', j === k)); };
@@ -262,9 +268,9 @@ function bindScrub(t) {
 function reset() {
   if (mode !== 'results') return; mode = 'wall';
   document.body.classList.remove('docked'); $('back').classList.remove('on'); $('more')?.remove();
-  $('sent').innerHTML = ''; $('sent').style.fontSize = ''; $('hero').style.top = '';
+  $('sent').innerHTML = ''; $('sent').style.fontSize = ''; $('hero').style.top = ''; $('q').value = '';
   const l1 = document.querySelector('.l1'); l1.style.opacity = 1; l1.style.filter = 'none';
-  for (const t of tiles) { if (t.caught) { t.caught = false; t.el.className = 't'; t.el.querySelector('.info')?.remove(); t.el.style.width = t.el.style.height = ''; t.el.onpointermove = t.el.onpointerleave = null; spawn(t, .55 + Math.random() * .45); } }
+  for (const t of tiles) { if (t.caught) { t.caught = false; t.el.className = 't'; t.el.querySelector('.info')?.remove(); t.el.style.width = t.el.style.height = ''; t.el.onpointermove = t.el.onpointerleave = t.el.onclick = null; spawn(t, .55 + Math.random() * .45); } }
   wallA = 0; wallFade(1); head(theme);
 }
 function toast(msg) { const t = $('toast'); t.innerHTML = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2600); }
@@ -277,7 +283,7 @@ $('bar').onsubmit = e => { e.preventDefault(); const v = $('q').value.trim();
   const id = v ? route(v) : theme; if (id) run(id); else toast('Demo preview <i>— try matcha, Sephora, Air Jordans or F1</i>'); };
 $('back').onclick = reset;
 document.querySelectorAll('[data-t]').forEach(a => a.onclick = () => toast('Demo preview <i>— available on real accounts</i>'));
-['focus', 'pointerdown', 'keydown'].forEach(ev => $('q').addEventListener(ev, () => { autoOn = false; }));
+['focus', 'pointerdown', 'keydown'].forEach(ev => $('q').addEventListener(ev, () => { if (ghosting) $('q').value = ''; autoOn = false; }));
 
 fetch('data.json').then(r => r.json()).then(async d => {
   DATA = d; ALL = d.queries.flatMap(q => q.videos.map(v => ({ ...v, q: q.id })));

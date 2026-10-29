@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Oriane — Live demo</title>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="logo.svg"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--paper:#F5F4F0;--paper2:#FAFAF8;--ink:#111110;--soft:#6B6A66;--mute:#9C9A94;--hair:#E3E1DB;--sig:#FF4F00;
   --tree:color-mix(in oklab,var(--ink) 13%,transparent);--act:#fff;--actsh:0 1px 2px rgba(17,17,16,.06),0 0 0 1px rgba(17,17,16,.06);
@@ -97,7 +97,7 @@ main{overflow-y:auto;position:relative;min-width:0}
 .card.in{opacity:1;transform:none}.card:hover{box-shadow:0 18px 40px -12px rgba(17,17,16,.3),0 0 0 1px rgba(17,17,16,.08);transform:translateY(-2px)}
 .card > img{width:100%;height:100%;object-fit:cover}
 .card .scrim{position:absolute;inset:auto 0 0;height:56%;background:linear-gradient(to top,rgba(10,10,9,.84),rgba(10,10,9,.35) 55%,rgba(10,10,9,0))}
-.card .top{position:absolute;left:10px;top:10px;display:flex;gap:6px;align-items:center;color:#fff;font-size:12px;font-weight:500;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.card .top{position:absolute;left:8px;top:8px;display:flex;gap:6px;align-items:center;color:#fff;font-size:12px;font-weight:500;padding:3px 8px;border-radius:999px;background:rgba(10,10,9,.42);backdrop-filter:blur(6px)}
 .card .top svg{width:14px;height:14px}
 .card .tag{position:absolute;left:10px;right:10px;bottom:40px;color:#fff;font-size:12px;line-height:1.35}
 .card .tag b{display:inline-block;font:500 10.5px 'Geist Mono';letter-spacing:.06em;background:var(--sig);color:#fff;padding:2px 6px;border-radius:4px;margin-bottom:5px}
@@ -271,9 +271,13 @@ function active() { const h = location.hash; $$('.nl').forEach(a => { const p = 
 function band(crumb, title, act = '') { return `<div class="band"><div><div class="crumb">${crumb}</div><h1>${title}</h1></div><div class="act">${act}</div></div>`; }
 function count(el, to, ms = 1400, f = fmt) { const t0 = performance.now(); (function k() { const p = Math.min(1, (performance.now() - t0) / ms); el.textContent = f(Math.round(to * (1 - (1 - p) ** 3))); if (p < 1) requestAnimationFrame(k); })(); }
 function keyed(prompt, keys) { let s = prompt; keys.forEach((k, i) => s = s.replace(k, `\u0001${i}\u0002`)); return s.replace(/\u0001(\d)\u0002/g, (_, i) => `<span class="k">${keys[i]}</span>`); }
+const cut = (s, n) => { s = (s || '').replace(/\s+/g, ' ').trim(); if (s.length <= n) return s; const c = s.slice(0, n); return c.slice(0, Math.max(c.lastIndexOf(' '), n * .6 | 0)).replace(/[\s#@,.:;—-]+$/, '') + '…'; };
+// real length when Oriane returned one; otherwise only a scale for the frames, never shown as a length
+const durOf = v => v.dur > 0 ? v.dur : Math.max(8, ...v.frames.map(f => +f.split('_')[1] || 0)) + 2;
+let LOOP = 0;
 function card(v, qid) {
   const lab = Q[qid].label, said = v.said && v.said.text;
-  const tag = lab === 'seen' ? '<b>SEEN</b><br>Air Jordan · visual match' : said ? `<b>SAID ${mmss(v.said.t0)}</b><br>“${said.length > 44 ? said.slice(0, 42) + '…' : said}”` : `<b>MATCHED</b><br>${v.cap.slice(0, 40)}`;
+  const tag = lab === 'seen' ? '<b>FOUND</b><br>by visual search' : said ? `<b>SAID ${mmss(v.said.t0)}</b><br>“${said.length > 44 ? said.slice(0, 42) + '…' : said}”` : `<b>MATCHED</b><br>${cut(v.cap, 40)}`;
   const fr = ['thumb', ...v.frames];
   return `<a class="card" href="#/video/${v.id}" data-id="${v.id}"><img src="media/${v.id}/thumb.webp" alt=""><div class="scrim"></div>
     <div class="top">${v.p === 'tiktok' ? TT : IG}${v.views ? fmt(v.views) : ''}</div><div class="scrub">${fr.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>
@@ -296,33 +300,36 @@ const V = {
     return band('Discover', 'Search') + `<div class="pg"><div class="srch"><h2>What videos do you need today?</h2>
       <form class="bar" id="sbar" autocomplete="off"><span class="sp">✦</span><input id="sq" placeholder="Describe the videos — what is seen, said or written"><button class="go">${UP}</button></form>
       <div class="try">${Object.entries(Q).map(([id, q]) => `<button class="sug" data-q="${id}">${q.name}</button>`).join('')}</div>
-      <div class="recent"><div class="lbl" style="padding:0 14px 8px">Recent searches · this account</div>${recent}</div></div></div>`;
+      <div class="recent"><div class="lbl" style="padding:0 14px 8px">Recent searches</div>${recent}</div></div></div>`;
   },
   results(id = 'Q3') {
     const q = Q[id], data = DATA.queries.find(x => x.id === id), vids = q.order ? q.order.map(x => VID[x]) : data.videos;
     return band('Discover · Results', q.name, `<button class="btn" data-demo>${IC.dl}Export CSV</button><button class="btn dk" data-demo>Save search</button>`) +
       `<div class="pg"><div class="q" id="qq">${keyed(data.prompt, q.keys)}</div><div class="chips" id="chips">${q.chips.map(([k, v]) => `<span class="chip"><span class="k">${k}</span>${v}</span>`).join('')}</div>
       <div class="stats" id="stats">${q.stats.map(([l]) => `<div class="stat"><div class="v">0</div><div class="lbl">${l}</div></div>`).join('')}</div>
-      <div class="tools"><span class="sel">${IC.grid.replace('class="i"', 'class="i" style="width:14px;height:14px"')}${q.sort}</span><span class="sel">TikTok · Instagram</span><span class="lbl" style="margin-left:auto">Showing ${vids.length} of ${q.total ? q.total.toLocaleString('en') : 'all'}</span></div>
+      <div class="tools"><span class="sel">${IC.grid.replace('class="i"', 'class="i" style="width:14px;height:14px"')}${q.sort}</span><span class="sel">TikTok · Instagram</span><span class="lbl" style="margin-left:auto">Showing ${vids.length}${q.total ? ' of ' + q.total.toLocaleString('en') : ''}</span></div>
       <div class="grid" id="grid">${vids.map(v => card(v, id)).join('')}${q.total ? `<div class="more"><b>+${(q.total - vids.length).toLocaleString('en')}</b>more videos</div>` : ''}</div></div>`;
   },
   video(id = '7683582634810789141') {
-    const v = VID[id], q = Q[v.q], dur = Math.max(v.dur || 30, 1), said = v.said;
+    const v = VID[id], q = Q[v.q], dur = durOf(v), real = v.dur > 0, said = v.said;
     const nf = v.frames.map(f => ({ f, t: +f.split('_')[1] }));
-    const written = v.q === 'Q1' ? '<div class="no">✕ “matcha” is not in the caption</div>' : v.q === 'Q3' ? '<div class="no">✕ Nike, Jordan, AJ1… not in caption or hashtags</div>' : v.q === 'Q2' ? `<div class="ok">${/sephora/i.test(v.cap) ? '✓ caption names Sephora' : '✕ caption never names Sephora'}</div>` : `<div class="ok">${v.cap.slice(0, 60)}</div>`;
+    const tagHit = re => (v.cap.match(/#\S+/g) || []).find(h => re.test(h)), bare = re => re.test(v.cap.replace(/#\S+/g, ''));
+    const written = v.q === 'Q1' ? (bare(/\bmatcha\b/i) ? '<div class="ok">✓ caption writes “matcha”</div>' : tagHit(/matcha/i) ? `<div class="no">✕ never written as a word, only inside ${tagHit(/matcha/i)}</div>` : '<div class="no">✕ “matcha” is not in the caption</div>')
+      : v.q === 'Q3' ? (/nike|jordan|\baj1\b/i.test(v.cap) ? '<div class="ok">✓ caption names the brand</div>' : '<div class="no">✕ Nike, Jordan, AJ1… not in caption or hashtags</div>')
+      : v.q === 'Q2' ? `<div class="ok">${/sephora/i.test(v.cap) ? '✓ caption names Sephora' : '✕ caption never names Sephora'}</div>` : `<div class="ok">${cut(v.cap, 60)}</div>`;
     const saidLane = said ? `<div class="seg" style="left:${said.t0 / dur * 100}%;width:${Math.max(.8, (said.t1 - said.t0) / dur * 100)}%"><span>${mmss(said.t0)} “${said.text.length > 40 ? said.text.slice(0, 38) + '…' : said.text}”</span></div>` : v.q === 'Q3' ? '<div class="no">✕ brand never said</div>' : '<div class="ok">—</div>';
     const er = v.views ? (v.likes / v.views * 100).toFixed(1) + '%' : '—';
     const words = said ? said.text : '';
     const kw = v.q === 'Q1' ? /matcha/gi : /sephora/gi;
     return band(`Discover · ${q.name}`, '@' + v.h, `<a class="btn" href="#/results/${v.q}">← Results</a><button class="btn" data-demo>Open on ${v.p === 'tiktok' ? 'TikTok' : 'Instagram'}</button>`) +
-      `<div class="pg"><div class="vd"><div class="player" id="player"><img id="pimg" src="media/${v.id}/thumb.webp" alt=""><div class="tc" id="tc">0:00 / ${mmss(dur)}</div><div class="sub" id="sub">${words.replace(kw, m => `<em>${m}</em>`)}</div></div>
+      `<div class="pg"><div class="vd"><div class="player" id="player"><img id="pimg" src="media/${v.id}/thumb.webp" alt=""><div class="tc" id="tc">0:00${real ? ' / ' + mmss(dur) : ''}</div><div class="sub" id="sub">${words.replace(kw, m => `<em>${m}</em>`)}</div></div>
       <div><div class="meta"><img src="media/pfp/${v.h}.webp" alt=""><div><b>@${v.h}</b><small>${fmt(v.fol)} followers · ${v.p === 'tiktok' ? 'TikTok' : 'Instagram'}</small></div></div>
-      <div class="kv"><div><div class="v">${v.views ? fmt(v.views) : '—'}</div><div class="lbl">Views</div></div><div><div class="v">${fmt(v.likes)}</div><div class="lbl">Likes</div></div><div><div class="v">${er}</div><div class="lbl">Likes / views</div></div><div><div class="v">${mmss(dur)}</div><div class="lbl">Length</div></div></div>
+      <div class="kv"><div><div class="v">${v.views ? fmt(v.views) : '—'}</div><div class="lbl">Views</div></div><div><div class="v">${fmt(v.likes)}</div><div class="lbl">Likes</div></div><div><div class="v">${er}</div><div class="lbl">Likes / views</div></div><div><div class="v">${real ? mmss(dur) : '—'}</div><div class="lbl">Length</div></div></div>
       <div class="panel tracks" id="tracks"><div class="lbl" style="margin-bottom:12px">What Oriane read in this video</div>
         <div class="trk"><div class="nm">Seen</div><div class="lane" data-lane>${nf.map(o => `<div class="fr" style="left:${o.t / dur * 100}%"><img src="media/${v.id}/${o.f}.webp" alt=""></div>`).join('')}<div class="ph" id="ph1"></div></div></div>
         <div class="trk"><div class="nm">Said</div><div class="lane" data-lane>${saidLane}<div class="ph" id="ph2"></div></div></div>
         <div class="trk"><div class="nm">Written</div><div class="lane" data-lane>${written}<div class="ph" id="ph3"></div></div></div>
-        <div class="ruler"><span></span><div><span>0:00</span><span>${mmss(dur / 2)}</span><span>${mmss(dur)}</span></div></div></div>
+        <div class="ruler"><span></span><div>${real ? `<span>0:00</span><span>${mmss(dur / 2)}</span><span>${mmss(dur)}</span>` : ''}</div></div></div>
       <div class="frames">${nf.map(o => `<div class="f" data-t="${o.t}"><img src="media/${v.id}/${o.f}.webp" alt=""><span>${mmss(o.t)}</span></div>`).join('')}</div>
       <div class="panel tx"><div class="lbl" style="margin-bottom:8px">Caption</div>${v.cap}${said ? `<div class="lbl" style="margin:16px 0 8px">Transcript · ${mmss(said.t0)}–${mmss(said.t1)}</div>${said.text.replace(kw, m => `<mark>${m}</mark>`)}` : ''}</div></div></div></div>`;
   },
@@ -333,7 +340,7 @@ const V = {
         <canvas id="dots"></canvas><div class="cnt"><div><div class="v" id="c1">0</div><div class="lbl">Videos caption tools find</div></div><div><div class="v s" id="c2">0</div><div class="lbl">Videos Oriane finds</div></div><div><div class="v" id="c3">0×</div><div class="lbl">More of the conversation</div></div></div></div>
       <div style="display:flex;flex-direction:column;gap:24px"><div class="panel"><div class="lbl">Brand video exposure that is untagged</div><div class="big" id="pct" style="margin-top:12px">0%</div>
         <p style="font-size:13.5px;color:var(--soft);line-height:1.5;margin-top:10px">Across the brands Oriane has measured, most exposure lives in what creators show and say, not in what they write.</p></div>
-        <div class="panel"><div class="lbl">From this account · last 3 months</div><div class="hb" id="hb">
+        <div class="panel"><div class="lbl">Searches in this demo · last 3 months</div><div class="hb" id="hb">
         ${[['Matcha said, never captioned', 2916456884, '2.92B views'], ['Sephora said out loud', 2977895522, '2.98B views'], ['Air Jordans, brand never named', 99674336, '99.7M views'], ['F1 champagne showers', 34784533, '34.8M views']].map(([l, n, t]) => `<div class="r"><div class="l">${l}<span>${t}</span></div><div class="bar2"><i style="transform:scaleX(0)" data-w="${Math.max(.02, n / 2977895522)}"></i></div></div>`).join('')}</div></div></div></div></div>`;
   },
   ask() {
@@ -375,7 +382,7 @@ const CODE = {
 <span class="k">You</span>     Find TikToks and Reels that show Air Jordans
         but never name the brand. Last 3 months.
 
-<span class="k">Claude</span>  <span class="c">→ oriane.contents.search</span>
+<span class="k">Claude</span>  <span class="c">→ Oriane MCP · content search</span>
         caption <span class="o">✕</span> Nike, Jordan, AJ1 · seen <span class="o">≈</span> Air Jordan ≥ 0.85
         <span class="s">185 videos · 99.7M views</span>`,
   csv: `<button class="cp" data-copy>Copy</button><span class="c"># unmentioned-air-jordans.csv — up to 10,000 rows</span>
@@ -397,10 +404,10 @@ const AFTER = {
     bindCards($('#grid'));
   },
   video(id = '7683582634810789141') {
-    const v = VID[id], dur = Math.max(v.dur || 30, 1), fr = v.frames.map(f => ({ f, t: +f.split('_')[1] })), said = v.said;
+    const v = VID[id], dur = durOf(v), real = v.dur > 0, fr = v.frames.map(f => ({ f, t: +f.split('_')[1] })), said = v.said, me = LOOP;
     let t = Math.max(0, (said ? said.t0 : 0) - 3), last = performance.now(), rate = dur / 12;
-    const tick = now => { if (!$('#pimg')) return; t = (t + (now - last) / 1000 * rate) % dur; last = now; draw(); requestAnimationFrame(tick); };
-    const draw = () => { const x = t / dur * 100 + '%'; ['#ph1', '#ph2', '#ph3'].forEach(s => $(s).style.left = x); $('#tc').textContent = `${mmss(t)} / ${mmss(dur)}`;
+    const tick = now => { if (!$('#pimg') || me !== LOOP) return; t = (t + (now - last) / 1000 * rate) % dur; last = now; draw(); requestAnimationFrame(tick); };
+    const draw = () => { const x = t / dur * 100 + '%'; ['#ph1', '#ph2', '#ph3'].forEach(s => $(s).style.left = x); $('#tc').textContent = real ? `${mmss(t)} / ${mmss(dur)}` : mmss(t);
       let cur = 'thumb'; fr.forEach(o => { if (o.t <= t) cur = o.f; }); const src = `media/${v.id}/${cur}.webp`; if (!$('#pimg').src.endsWith(src)) $('#pimg').src = src;
       $$('.frames .f').forEach(f => f.classList.toggle('on', 'media/' + v.id + '/' + cur + '.webp' === src && +f.dataset.t === (fr.find(o => o.f === cur) || {}).t));
       $('#sub').classList.toggle('on', !!said && t >= said.t0 - .3 && t <= Math.max(said.t1, said.t0 + 2.5)); };
@@ -425,8 +432,8 @@ const AFTER = {
   },
   ask() {
     const flow = [
-      { q: 'Which creators drove the most views on unmentioned Air Jordans?', id: 'Q3', head: v => `@${v[0].h} leads with ${fmt(v[0].views)} views — Jordans on screen, the brand never named.`, eye: 'VIEWS · UNMENTIONED AIR JORDANS · TOP 5' },
-      { q: 'And where is matcha said the most, without being captioned?', id: 'Q1', head: v => `@${v[0].h}: ${fmt(v[0].views)} views, “${v[0].said.text}” — matcha never written.`, eye: 'VIEWS · SAID “MATCHA”, NEVER CAPTIONED · TOP 5' },
+      { q: 'Which creators drove the most views on unmentioned Air Jordans?', id: 'Q3', head: v => `@${v[0].h} leads with ${fmt(v[0].views)} views — found by visual search, the brand never named.`, eye: 'VIEWS · UNMENTIONED AIR JORDANS · TOP 5 OF THE LOADED RESULTS' },
+      { q: 'And where is matcha said the most, without being captioned?', id: 'Q1', head: v => `@${v[0].h}: ${fmt(v[0].views)} views, “${v[0].said.text}” — matcha never written.`, eye: 'VIEWS · SAID “MATCHA”, NEVER CAPTIONED · TOP 5 OF THE LOADED RESULTS' },
     ];
     let k = 0, alive = true; const th = $('#thread');
     const answer = async (f) => {
@@ -441,14 +448,14 @@ const AFTER = {
     play();
     $('#aq').addEventListener('focus', () => { alive = false; });
     $('#abar').onsubmit = e => { e.preventDefault(); alive = false; const s = $('#aq').value.trim(); if (!s) return; $('#aq').value = ''; const id = route(s);
-      if (id) answer({ q: s, id, head: v => `@${v[0].h} tops “${Q[id].name}” with ${fmt(v[0].views)} views.`, eye: 'VIEWS · ' + Q[id].name.toUpperCase() + ' · TOP 5' }); else toast('Demo preview <i>— ask about matcha, Sephora, Air Jordans or F1</i>'); };
+      if (id) answer({ q: s, id, head: v => `@${v[0].h} tops “${Q[id].name}” with ${fmt(v[0].views)} views.`, eye: 'VIEWS · ' + Q[id].name.toUpperCase() + ' · TOP 5 OF THE LOADED RESULTS' }); else toast('Demo preview <i>— ask about matcha, Sephora, Air Jordans or F1</i>'); };
   },
   creators() {
     const by = {}; ALL.forEach(v => { const o = by[v.h] ||= { h: v.h, p: v.p, fol: v.fol, views: 0, likes: 0, n: 0, qs: new Set() }; o.views += v.views; o.likes += v.likes; o.n++; o.qs.add(Q[v.q].name); });
     let rows = Object.values(by), key = 'views';
     const cols = [['h', 'Creator'], ['p', 'Platform'], ['fol', 'Followers'], ['views', 'Views'], ['er', 'Likes / views'], ['qs', 'Found in'], ['x', '']];
-    const draw = () => { rows.sort((a, b) => key === 'er' ? (b.likes / (b.views || 1)) - (a.likes / (a.views || 1)) : (b[key] || 0) - (a[key] || 0));
-      $('#ct').innerHTML = `<tr>${cols.map(([k, l]) => `<th data-k="${k}" class="${k === key ? 's' : ''}">${l}</th>`).join('')}</tr>` + rows.map(o => `<tr><td><div class="h"><img src="media/pfp/${o.h}.webp" alt="">@${o.h}</div></td><td class="pl">${o.p === 'tiktok' ? TT + ' TikTok' : IG + ' Instagram'}</td><td>${fmt(o.fol)}</td><td>${o.views ? fmt(o.views) : '—'}</td><td>${o.views ? (o.likes / o.views * 100).toFixed(1) + '%' : '—'}</td><td><span class="q2">${[...o.qs].join(' · ')}</span></td><td><button class="btn ra" data-demo>Add to list</button></td></tr>`).join('');
+    const draw = () => { rows.sort((a, b) => key === 'er' ? (b.views ? b.likes / b.views : -1) - (a.views ? a.likes / a.views : -1) : (b[key] || 0) - (a[key] || 0));
+      $('#ct').innerHTML = `<tr>${cols.map(([k, l]) => `<th data-k="${k}" class="${k === key ? 's' : ''}"${['fol', 'views', 'er'].includes(k) ? '' : ' style="cursor:default"'}>${l}</th>`).join('')}</tr>` + rows.map(o => `<tr><td><div class="h"><img src="media/pfp/${o.h}.webp" alt="">@${o.h}</div></td><td class="pl">${o.p === 'tiktok' ? TT + ' TikTok' : IG + ' Instagram'}</td><td>${fmt(o.fol)}</td><td>${o.views ? fmt(o.views) : '—'}</td><td>${o.views ? (o.likes / o.views * 100).toFixed(1) + '%' : '—'}</td><td><span class="q2">${[...o.qs].join(' · ')}</span></td><td><button class="btn ra" data-demo>Add to list</button></td></tr>`).join('');
       $$('#ct th').forEach(h => h.onclick = () => { if (['fol', 'views', 'er'].includes(h.dataset.k)) { key = h.dataset.k; draw(); } }); };
     draw();
   },
@@ -456,7 +463,8 @@ const AFTER = {
 };
 
 function render() {
-  const [, view = 'search', arg] = (location.hash || '#/search').split('/'); const fn = V[view] ? view : 'search';
+  LOOP++; let [, view = 'search', arg] = (location.hash || '#/search').split('/'); const fn = V[view] ? view : 'search';
+  if (fn === 'results' && !Q[arg]) arg = undefined; if (fn === 'video' && !VID[arg]) arg = undefined;
   $('#main').innerHTML = V[fn](arg); $('#main').scrollTop = 0; active(); AFTER[fn] && AFTER[fn](arg);
 }
 document.addEventListener('click', e => { const d = e.target.closest('[data-demo]'); if (d) { e.preventDefault(); toast(); } const c = e.target.closest('[data-copy]'); if (c) { c.textContent = 'Copied'; setTimeout(() => c.textContent = 'Copy', 1400); } });

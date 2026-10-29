@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oriane — Live demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F5F4F0;--paper2:#FAFAF8;--ink:#111110;--soft:#6B6A66;--mute:#9C9A94;--hair:#E3E1DB;--sig:#FF4F00;
+  --tree:color-mix(in oklab,var(--ink) 13%,transparent);--act:#fff;--actsh:0 1px 2px rgba(17,17,16,.06),0 0 0 1px rgba(17,17,16,.06);
+  --e:cubic-bezier(.7,0,.2,1);--o:cubic-bezier(.2,.9,.3,1);
+  --sh:0 24px 48px -12px rgba(17,17,16,.10),0 8px 16px -4px rgba(17,17,16,.04),0 3px 4px rgba(17,17,16,.04),0 1px 1px rgba(17,17,16,.06),0 0 0 1px rgba(17,17,16,.07);
+  --metal:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0035 0.75' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .46 0 0 0 0 .48 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),linear-gradient(100deg,#b9bcc1 0%,#eef0f2 22%,#c4c7cc 38%,#9da2a9 52%,#e6e8eb 68%,#b3b7bd 84%,#dfe1e4 100%)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Geist,system-ui,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden}
+.mono{font-family:'Geist Mono',ui-monospace,monospace}
+img{display:block}button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}a{color:inherit;text-decoration:none;cursor:pointer}
+svg.i{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.app{display:grid;grid-template-columns:272px 1fr;height:100vh}
+
+/* sidebar: Convu structure */
+aside{background:var(--paper2);border-right:1px solid var(--hair);display:flex;flex-direction:column;padding:0 0 12px;min-height:0}
+.brand{display:flex;align-items:center;justify-content:space-between;padding:24px 18px 18px 20px}
+.brand img{height:19px}.brand button{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;color:var(--soft)}
+.brand button:hover{background:rgba(17,17,16,.05)}
+.switch{margin:0 12px 22px;display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(17,17,16,.05),0 0 0 1px var(--hair),0 6px 16px -10px rgba(17,17,16,.2);cursor:pointer}
+.switch .ic{width:32px;height:32px;border-radius:9px;border:1px solid var(--hair);background:var(--paper2);display:grid;place-items:center;color:var(--soft)}
+.switch .ic svg{width:16px;height:16px}
+.switch b{display:block;font-size:12.5px;font-weight:600}.switch small{display:block;font-size:11px;color:var(--soft)}
+.switch .ch{margin-left:auto;color:var(--mute)}
+.sec{padding:0 12px;margin-bottom:10px}
+.sech{display:flex;align-items:center;gap:10px;padding:8px 10px;font-size:11.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;user-select:none}
+.sech svg.i{width:20px;height:20px;color:var(--ink)}.sech .ch{margin-left:auto;color:var(--mute);transition:transform .25s}
+.sec.closed .ch{transform:rotate(180deg)}.sec.closed .tree{height:0!important;opacity:0}
+.tree{position:relative;margin-left:18px;padding-left:24px;display:flex;flex-direction:column;gap:3px;overflow:hidden;transition:height .3s var(--e),opacity .3s}
+.tree > svg{position:absolute;left:0;top:0;height:100%;overflow:visible;pointer-events:none}
+.nl{height:36px;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:9px;font-size:13px;font-weight:500;color:var(--soft);transition:background .15s,color .15s}
+.nl svg.i{width:18px;height:18px}
+.nl:hover{background:rgba(17,17,16,.04);color:var(--ink)}
+.nl.on{background:var(--act);box-shadow:var(--actsh);color:var(--ink);font-weight:600}.nl.on svg.i{color:var(--sig)}
+.nl .bd{margin-left:auto;font:600 9px 'Geist Mono';color:var(--sig);background:rgba(255,79,0,.12);padding:2px 6px;border-radius:99px}
+.foot{margin:auto 12px 0;border-radius:16px;padding:14px 10px 10px;background:var(--metal);background-size:cover;box-shadow:0 0 0 1px rgba(17,17,16,.08),0 10px 24px -14px rgba(17,17,16,.5);position:relative}
+.foot .dm{display:block;width:max-content;margin:0 auto 10px;background:#fff;border-radius:99px;padding:4px 12px;font:600 10px 'Geist Mono';letter-spacing:.22em;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.foot .in{background:#fff;border-radius:12px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.foot .rt{width:100%;height:38px;border-radius:9px;background:var(--paper2);box-shadow:0 0 0 1px var(--hair);font-size:12.5px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px}
+.foot .rt:hover{background:#fff}.foot .rt svg.i{width:15px;height:15px}
+.foot .me{display:flex;align-items:center;gap:10px;padding:10px 6px 4px;font-size:13px;font-weight:500;border-top:1px solid var(--hair);margin-top:8px}
+.foot .me .av{width:28px;height:28px;border-radius:50%;background:var(--paper);box-shadow:0 0 0 1px var(--hair);display:grid;place-items:center;color:var(--soft)}
+.foot .me .av svg{width:14px;height:14px}.foot .me span{margin-left:auto;font:400 11px 'Geist Mono';color:var(--mute)}
+
+/* main */
+main{overflow-y:auto;position:relative;min-width:0}
+.band{height:132px;background:var(--metal);background-size:cover;position:relative;display:flex;align-items:flex-end;padding:0 48px 22px;border-bottom:1px solid rgba(17,17,16,.1)}
+.band::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(245,244,240,.55),rgba(245,244,240,0) 70%);pointer-events:none}
+.band > *{position:relative;z-index:1}
+.band h1{font-weight:500;font-size:28px;letter-spacing:-.025em}
+.band .crumb{font:400 11.5px 'Geist Mono';letter-spacing:.08em;text-transform:uppercase;color:rgba(17,17,16,.55);margin-bottom:6px}
+.band .act{margin-left:auto;display:flex;gap:8px}
+.btn{height:34px;padding:0 14px;border-radius:99px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.75);box-shadow:0 0 0 1px rgba(17,17,16,.1);backdrop-filter:blur(8px);transition:background .15s}
+.btn:hover{background:#fff}.btn svg.i{width:15px;height:15px}
+.btn.dk{background:var(--ink);color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 4px 10px -2px rgba(17,17,16,.25)}
+.pg{padding:30px 48px 80px;animation:pe .45s var(--o) both}
+@keyframes pe{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.lbl{font:400 11px 'Geist Mono';letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.panel{background:#fff;border-radius:16px;box-shadow:0 1px 2px rgba(17,17,16,.05),0 0 0 1px var(--hair)}
+
+/* search */
+.srch{max-width:780px;margin:56px auto 0;text-align:center}
+.srch h2{font-weight:400;font-size:44px;letter-spacing:-.035em;margin-bottom:28px}
+.srch h2 .k{color:var(--sig)}
+.bar{display:flex;align-items:center;gap:12px;height:60px;padding:0 10px 0 20px;background:#fff;border-radius:18px;box-shadow:var(--sh);text-align:left}
+.bar:focus-within{box-shadow:var(--sh),0 0 0 4px rgba(255,79,0,.12)}
+.bar .sp{color:var(--sig)}.bar input{flex:1;border:0;outline:0;font:400 17px Geist;min-width:0;background:none}
+.bar .go{width:40px;height:40px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center}.bar .go svg.i{width:16px;height:16px}
+.recent{margin-top:40px;text-align:left}
+.row{display:flex;align-items:center;gap:14px;padding:13px 14px;border-radius:12px;transition:background .15s;cursor:pointer}
+.row:hover{background:rgba(17,17,16,.035)}
+.row .t{flex:1;font-size:14px;font-weight:500}.row .t small{display:block;font-weight:400;color:var(--soft);font-size:12.5px;margin-top:2px}
+.row .n{font:400 12.5px 'Geist Mono';color:var(--soft);text-align:right}
+.row .th{width:30px;height:42px;border-radius:6px;overflow:hidden;flex:none}.row .th img{width:100%;height:100%;object-fit:cover}
+.row .go2{opacity:0;transition:opacity .15s;color:var(--soft)}.row:hover .go2{opacity:1}
+.try{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+.sug{height:30px;padding:0 12px;border-radius:99px;font-size:13px;color:var(--soft);background:#fff;box-shadow:0 0 0 1px var(--hair)}.sug:hover{color:var(--ink)}
+
+/* results */
+.q{font-size:30px;font-weight:400;letter-spacing:-.03em;line-height:1.2;max-width:1200px}
+.q .k{background:linear-gradient(90deg,var(--sig) 0 50%,var(--ink) 50% 100%);background-size:200% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;color:transparent;transition:background-position .7s var(--e)}
+.q .k.lit{background-position:0 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{display:inline-flex;align-items:center;gap:9px;height:32px;padding:0 13px;border-radius:9px;background:#fff;font:400 13px 'Geist Mono';box-shadow:0 1px 2px rgba(17,17,16,.05),0 0 0 1px var(--hair);opacity:0;transform:translateY(-6px) scale(.98);filter:blur(2px);transition:all .45s var(--o)}
+.chip.on{opacity:1;transform:none;filter:none}.chip .k{color:var(--mute)}.chip .x,.chip .ok{color:var(--sig)}
+.stats{display:flex;gap:0;margin:26px 0 22px;padding:18px 0;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.stat{flex:1;padding:0 22px;border-left:1px solid var(--hair)}.stat:first-child{border-left:0;padding-left:0}
+.stat .v{font-size:30px;font-weight:300;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+.tools{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.tools .sel{height:32px;padding:0 12px;border-radius:99px;background:#fff;box-shadow:0 0 0 1px var(--hair);font-size:13px;display:inline-flex;align-items:center;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:16px}
+.card{position:relative;aspect-ratio:9/16;border-radius:14px;overflow:hidden;background:#E7E5DF;cursor:pointer;box-shadow:0 1px 2px rgba(17,17,16,.06),0 0 0 1px rgba(17,17,16,.06);opacity:0;transform:translateY(10px) scale(.985);transition:opacity .5s var(--o),transform .5s var(--o),box-shadow .2s}
+.card.in{opacity:1;transform:none}.card:hover{box-shadow:0 18px 40px -12px rgba(17,17,16,.3),0 0 0 1px rgba(17,17,16,.08);transform:translateY(-2px)}
+.card > img{width:100%;height:100%;object-fit:cover}
+.card .scrim{position:absolute;inset:auto 0 0;height:56%;background:linear-gradient(to top,rgba(10,10,9,.84),rgba(10,10,9,.35) 55%,rgba(10,10,9,0))}
+.card .top{position:absolute;left:10px;top:10px;display:flex;gap:6px;align-items:center;color:#fff;font-size:12px;font-weight:500;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.card .top svg{width:14px;height:14px}
+.card .tag{position:absolute;left:10px;right:10px;bottom:40px;color:#fff;font-size:12px;line-height:1.35}
+.card .tag b{display:inline-block;font:500 10.5px 'Geist Mono';letter-spacing:.06em;background:var(--sig);color:#fff;padding:2px 6px;border-radius:4px;margin-bottom:5px}
+.card .who{position:absolute;left:10px;right:10px;bottom:11px;display:flex;gap:7px;align-items:center;color:#fff;font-size:12px}
+.card .who img{width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.5)}
+.card .scrub{position:absolute;left:10px;right:10px;top:34px;display:flex;gap:3px;height:2px;opacity:0;transition:opacity .2s}
+.card .scrub i{flex:1;background:rgba(255,255,255,.35);border-radius:2px}.card .scrub i.on{background:#fff}.card:hover .scrub{opacity:1}
+.more{aspect-ratio:9/16;border-radius:14px;border:1px dashed #CFCCC4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--soft);font-size:13px}
+.more b{font-weight:400;font-size:30px;color:var(--ink);letter-spacing:-.02em}
+
+/* video detail */
+.vd{display:grid;grid-template-columns:380px 1fr;gap:40px;align-items:start}
+.player{position:relative;aspect-ratio:9/16;border-radius:18px;overflow:hidden;background:#111;box-shadow:0 30px 60px -24px rgba(17,17,16,.5)}
+.player img{width:100%;height:100%;object-fit:cover;transition:opacity .25s}
+.player .sub{position:absolute;left:16px;right:16px;bottom:22px;text-align:center;color:#fff;font-size:15px;line-height:1.35;text-shadow:0 1px 8px rgba(0,0,0,.7);opacity:0;transition:opacity .3s}
+.player .sub em{font-style:normal;color:#fff;background:var(--sig);border-radius:4px;padding:0 4px}
+.player .sub.on{opacity:1}
+.player .tc{position:absolute;left:14px;top:14px;font:500 12px 'Geist Mono';color:#fff;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);padding:4px 8px;border-radius:6px}
+.meta{display:flex;align-items:center;gap:14px}
+.meta img{width:44px;height:44px;border-radius:50%}
+.meta b{font-size:17px;font-weight:600}.meta small{display:block;color:var(--soft);font-size:13px}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);margin:22px 0;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.kv > div{padding:14px 18px;border-left:1px solid var(--hair)}.kv > div:first-child{border-left:0;padding-left:0}
+.kv .v{font-size:22px;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.tracks{padding:20px 22px 18px}
+.trk{display:grid;grid-template-columns:86px 1fr;align-items:center;gap:14px;height:46px}
+.trk .nm{font:500 11px 'Geist Mono';letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
+.lane{position:relative;height:30px;border-radius:8px;background:var(--paper);overflow:visible;cursor:pointer}
+.lane .seg{position:absolute;top:0;bottom:0;border-radius:6px;background:var(--sig);min-width:6px;transform-origin:left;animation:grow .7s var(--o) both}
+@keyframes grow{from{transform:scaleX(0)}}
+.lane .seg span{position:absolute;left:calc(100% + 10px);top:7px;white-space:nowrap;font:500 11px 'Geist Mono';color:var(--sig)}
+.lane .fr{position:absolute;top:3px;width:18px;height:24px;margin-left:-9px;border-radius:4px;overflow:hidden;box-shadow:0 0 0 1.5px #fff,0 2px 6px rgba(0,0,0,.25)}
+.lane .fr img{width:100%;height:100%;object-fit:cover}
+.lane .no{position:absolute;inset:0;border-radius:8px;background:repeating-linear-gradient(135deg,rgba(255,79,0,.08) 0 6px,transparent 6px 12px);display:flex;align-items:center;padding-left:12px;font:400 12px 'Geist Mono';color:var(--sig)}
+.lane .ok{position:absolute;inset:0;display:flex;align-items:center;padding-left:12px;font:400 12px 'Geist Mono';color:var(--soft)}
+.ph{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--ink);border-radius:2px;pointer-events:none}
+.ruler{display:grid;grid-template-columns:86px 1fr;gap:14px;margin-top:4px}.ruler div{display:flex;justify-content:space-between;font:400 11px 'Geist Mono';color:var(--mute)}
+.frames{display:flex;gap:10px;margin-top:20px}
+.frames .f{width:96px;cursor:pointer}.frames .f img{width:96px;height:170px;object-fit:cover;border-radius:10px;box-shadow:0 0 0 1px var(--hair)}
+.frames .f.on img{box-shadow:0 0 0 2px var(--sig)}
+.frames .f span{display:block;font:400 11px 'Geist Mono';color:var(--soft);margin-top:6px}
+.tx{margin-top:22px;padding:18px 20px;font-size:15px;line-height:1.55}
+.tx mark{background:rgba(255,79,0,.14);color:var(--ink);border-radius:4px;padding:0 3px;box-shadow:0 0 0 1px rgba(255,79,0,.35)}
+
+/* shadow reach */
+.sr{display:grid;grid-template-columns:1fr 380px;gap:24px}
+.sr .panel{padding:24px}
+#dots{width:100%;height:420px;display:block;margin-top:14px}
+.legend{display:flex;gap:20px;font-size:13px;color:var(--soft)}.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:0}
+.cnt{display:grid;grid-template-columns:repeat(3,1fr);margin-top:18px;border-top:1px solid var(--hair);padding-top:16px}
+.cnt .v{font-size:40px;font-weight:300;letter-spacing:-.03em;font-variant-numeric:tabular-nums}.cnt .v.s{color:var(--sig)}
+.big{font-size:84px;font-weight:300;letter-spacing:-.05em;line-height:1}
+.hb{margin-top:16px}.hb .r{margin-bottom:14px}.hb .r .l{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.hb .r .l span{color:var(--soft);font:400 12px 'Geist Mono'}
+.hb .bar2{height:8px;border-radius:4px;background:var(--paper);overflow:hidden}.hb .bar2 i{display:block;height:100%;background:var(--ink);border-radius:4px;transform-origin:left;transition:transform 1.2s var(--e)}
+
+/* ask */
+.ask{display:grid;grid-template-columns:1fr 340px;gap:28px;height:calc(100vh - 132px - 30px)}
+.thread{display:flex;flex-direction:column;gap:18px;overflow:auto;padding-bottom:110px;max-width:860px}
+.ub{align-self:flex-end;background:var(--ink);color:#fff;border-radius:18px 18px 6px 18px;padding:11px 16px;font-size:14.5px;max-width:70%;animation:ci .35s var(--o) both}
+@keyframes ci{from{opacity:0;transform:translateY(-4px) scale(.985)}}
+.ans{animation:ci .45s var(--o) both;padding:22px 24px}
+.ans h4{font-size:19px;font-weight:500;letter-spacing:-.015em;margin:8px 0 16px}
+.ans .bars{display:flex;align-items:flex-end;gap:14px;height:150px;padding-top:10px}
+.ans .bars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}
+.ans .bars i{width:100%;border-radius:6px 6px 2px 2px;background:#E4E2DC;transform-origin:bottom;animation:gb .9s var(--o) both}
+.ans .bars div:first-child i{background:var(--ink)}
+@keyframes gb{from{transform:scaleY(0)}}
+.ans .bars span{font:400 11px 'Geist Mono';color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ans .bars b{font:500 12px 'Geist Mono'}
+.ans .vids{display:flex;gap:10px;margin-top:18px}.ans .vids img{width:74px;height:130px;object-fit:cover;border-radius:9px;cursor:pointer;box-shadow:0 0 0 1px var(--hair)}
+.spin{width:22px;height:22px;border-radius:50%;border:2px solid var(--hair);border-top-color:var(--ink);animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.askbar{position:sticky;bottom:0;max-width:860px}
+.rail .panel{padding:18px}.sig{padding:14px 0;border-top:1px solid var(--hair);font-size:13.5px;line-height:1.45}.sig:first-of-type{border-top:0}
+.sig b{font-weight:600}.sig small{display:block;font:400 11px 'Geist Mono';color:var(--mute);margin-top:4px}
+
+/* creators table */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font:400 11px 'Geist Mono';letter-spacing:.1em;text-transform:uppercase;color:var(--mute);padding:12px 14px;border-bottom:1px solid var(--hair);cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--ink)}th.s::after{content:" ↓";color:var(--sig)}
+td{padding:10px 14px;border-bottom:1px solid var(--hair);font-variant-numeric:tabular-nums}
+tr:hover td{background:rgba(17,17,16,.02)}
+td .h{display:flex;align-items:center;gap:10px;font-weight:500}td .h img{width:28px;height:28px;border-radius:50%}
+td.pl{color:var(--soft)}td.pl svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+td .q2{font:400 11.5px 'Geist Mono';color:var(--sig)}
+td .ra{opacity:0;transition:opacity .15s}tr:hover td .ra{opacity:1}
+
+/* api */
+.api{display:grid;grid-template-columns:1fr 360px;gap:24px}
+.tabs{display:flex;gap:4px;padding:4px;background:var(--paper);border-radius:11px;width:max-content;margin-bottom:14px}
+.tabs button{height:30px;padding:0 14px;border-radius:8px;font-size:13px;color:var(--soft)}.tabs button.on{background:#fff;color:var(--ink);box-shadow:var(--actsh)}
+pre{background:#121211;color:#E9E7E1;border-radius:14px;padding:22px 24px;font:400 13.5px/1.65 'Geist Mono';overflow:auto;position:relative}
+pre .c{color:#7C7A73}pre .s{color:#FFB38A}pre .k{color:#9FC4FF}pre .o{color:var(--sig)}
+pre .cp{position:absolute;right:14px;top:14px;height:28px;padding:0 11px;border-radius:7px;background:rgba(255,255,255,.08);color:#E9E7E1;font:500 12px Geist}
+
+/* tour + toast */
+.spot{position:fixed;z-index:80;border-radius:14px;pointer-events:none;box-shadow:0 0 0 200vmax rgba(17,17,16,.42),0 0 0 1.5px rgba(255,255,255,.9),0 0 40px 10px rgba(17,17,16,.25);transition:all .7s var(--e);opacity:0}
+.spot.on{opacity:1}
+.tour{position:fixed;z-index:90;right:36px;bottom:32px;width:390px;background:#fff;border-radius:18px;padding:20px 22px 18px;box-shadow:0 30px 70px -20px rgba(0,0,0,.35),0 0 0 1px var(--hair);transition:opacity .3s,transform .3s var(--o)}
+.tour.off{opacity:0;transform:translateY(10px);pointer-events:none}
+.tour .hd{display:flex;align-items:center;justify-content:space-between}
+.tour .n{font:500 12px 'Geist Mono';color:var(--soft)}.tour .x{width:26px;height:26px;border-radius:7px;color:var(--mute);display:grid;place-items:center}.tour .x:hover{color:var(--ink);background:var(--paper)}
+.tour h3{font-size:19px;font-weight:500;letter-spacing:-.015em;margin:12px 0 6px}
+.tour p{font-size:14px;line-height:1.5;color:var(--soft)}
+.tour .seg{display:flex;gap:4px;margin:16px 0 14px}.tour .seg i{flex:1;height:3px;border-radius:2px;background:var(--hair);transition:background .3s}.tour .seg i.on{background:var(--ink)}
+.tour .nav{display:flex;justify-content:space-between}
+.toast{position:fixed;left:calc(50% + 136px);bottom:34px;transform:translate(-50%,10px);z-index:95;background:var(--ink);color:#fff;font-size:13.5px;padding:11px 16px;border-radius:12px;opacity:0;transition:all .35s var(--o);pointer-events:none;box-shadow:0 12px 30px -8px rgba(0,0,0,.4)}
+.toast.on{opacity:1;transform:translate(-50%,0)}.toast i{font-style:normal;color:#A8A6A0;margin-left:6px}
+</style></head><body>
+<div class="app">
+<aside>
+  <div class="brand"><a href="index.html"><img src="logo.svg" alt="Oriane"></a><button data-demo title="Collapse"><svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9.5 4.5v15M15.5 10l-2 2 2 2"/></svg></button></div>
+  <div class="switch" data-demo><div class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg></div><div><b>Brand team view</b><small>Switch to agency view</small></div><svg class="i ch" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m7 10 5 5 5-5"/></svg></div>
+  <nav id="nav"></nav>
+  <div class="foot"><span class="dm">DEMO MODE</span><div class="in">
+    <button class="rt" id="rt"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Restart tour</button>
+    <div class="me"><div class="av"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></div>Guest<span>EN</span></div></div></div>
+</aside>
+<main id="main"></main>
+</div>
+<div class="spot" id="spot"></div>
+<div class="tour off" id="tour"></div>
+<div class="toast" id="toast"></div>
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const fmt = n => n >= 1e9 ? (n / 1e9).toFixed(2) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'K' : (+n).toLocaleString('en');
+const mmss = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+const I = d => `<svg class="i" viewBox="0 0 24 24">${d}</svg>`;
+const IC = { search: I('<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>'), grid: I('<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>'),
+  play: I('<rect x="5" y="3.5" width="14" height="17" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5z"/>'), eye: I('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>'),
+  spark: I('<path d="M12 3.5 13.8 10 20.5 12 13.8 14 12 20.5 10.2 14 3.5 12 10.2 10z"/>'), users: I('<circle cx="9" cy="8.5" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5"/><path d="M16 5.5a3.2 3.2 0 0 1 0 6M18.5 14.5c1.5.7 2.5 2.4 3 5"/>'),
+  dl: I('<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 20h14"/>'), code: I('<path d="m8.5 7.5-4.5 4.5 4.5 4.5M15.5 7.5l4.5 4.5-4.5 4.5"/>'),
+  folder: I('<path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" fill="currentColor"/>'), chart: I('<path d="M4 20V4M4 20h16M8.5 16v-4M13 16V8M17.5 16v-6"/>'), wrench: I('<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>') };
+const IG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/></svg>';
+const TT = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.1v12.4a2.6 2.6 0 1 1-1.8-2.5V9.7a5.7 5.7 0 1 0 4.9 5.7V9.1a7.3 7.3 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.3-1.6z"/></svg>';
+const UP = I('<path d="M12 19V5M6 11l6-6 6 6"/>');
+
+// Real searches from Amin's Oriane account (data.json). Compiled filters are Oriane's own.
+const Q = {
+  Q1: { name: 'Said “matcha”, never captioned', keys: ['matcha', 'said', 'not written'], label: 'said', thumb: '7683582634810789141',
+    chips: [['said', '<span class="ok">✓</span> matcha'], ['caption', '<span class="x">✕</span> matcha'], ['published', 'Jul 29 – Oct 29']],
+    stats: [['Videos', 18318, n => n.toLocaleString('en')], ['Views', 2916456884], ['Interactions', 165840985], ['Engagement', 65, n => (n / 10).toFixed(1) + '%']], total: 18318, sort: 'Most recent' },
+  Q2: { name: 'Sephora, said out loud', keys: ['Sephora', 'pronounced'], label: 'said', thumb: '7687623229917220116',
+    chips: [['said', '<span class="ok">✓</span> Sephora'], ['matched', 'Spoken Sephora'], ['published', 'last 3 months']],
+    stats: [['Views', 2977895522], ['Interactions', 137213706], ['Engagement', 61, n => (n / 10).toFixed(1) + '%']], sort: 'Most recent' },
+  Q3: { name: 'Unmentioned Air Jordans', keys: ['Nike Air Jordans', 'zero mention'], label: 'seen', thumb: 'Dc4SC-Zsj6I',
+    chips: [['seen', '<span class="ok">≈</span> Air Jordan ≥ 0.85'], ['caption', '<span class="x">✕</span> Nike, Jordan, Jordans, AJ1 +2'], ['hashtags', '<span class="x">✕</span> #AirJordan +6'], ['said', '<span class="x">✕</span> Nike, Jordan +4'], ['mentions', '<span class="x">✕</span> @airjordans +10'], ['published', 'Jul 29 – Oct 29']],
+    stats: [['Videos', 185, n => n], ['Views', 99674336], ['Interactions', 2557676]], total: 185, sort: 'Most similar visually',
+    order: ['Dc4SC-Zsj6I', 'DdeB2KZsm1V', '7681501875203607826', 'DdUfeMKRL8J', 'DcyZiRqu-O5', '7669955951100808481', 'DcoOwZjk2jl', '7681507639041330439', 'Dbr3veXJBJn', 'DdwTq9MoDf6', '7670950096749464854', 'DbvmS2oEQfZ', 'Dc5RHxEs8R8', 'Db8jAlqsfuB', 'Db_KtxDlT6p'] },
+  Q4: { name: 'F1 champagne showers', keys: ['champagne showers', 'Instagram'], label: 'matched', thumb: 'DeYSoPhT4ML',
+    chips: [['expanded', 'champagne shower · champagne spray · podium celebration · Moët · Ferrari Trento'], ['platform', 'Instagram']],
+    stats: [['Videos', 306, n => n], ['Views', 34784533], ['Interactions', 1118629]], total: 306, sort: 'Most recent' },
+};
+const NAV = [
+  ['Discover', IC.folder, [['#/search', 'Search', IC.search], ['#/results/Q3', 'Results', IC.grid], ['#/video/7683582634810789141', 'Video', IC.play]]],
+  ['Insights', IC.chart, [['#/shadow', 'Shadow Reach®', IC.eye], ['#/ask', 'Ask Oriane', IC.spark, 'AI'], ['#/creators', 'Creators', IC.users]]],
+  ['Build', IC.wrench, [['#/exports', 'Exports', IC.dl], ['#/api', 'API & MCP', IC.code]]],
+];
+let DATA, ALL, VID = {};
+
+function tree(n) { const l = 36, h = 3, r = 12, x = 11, last = (n - 1) * (l + h) + l / 2;
+  return `<svg width="24" aria-hidden="true"><path d="M ${x} 0 L ${x} ${last - r} ${Array.from({ length: n }, (_, p) => { const c = p * (l + h) + l / 2; return `M ${x} ${c - r} C ${x} ${c - r / 2}, ${x + r / 2} ${c}, ${x + r} ${c}`; }).join(' ')}" fill="none" style="stroke:var(--tree)" stroke-width="1" stroke-linecap="round"/></svg>`; }
+function sidebar() {
+  $('#nav').innerHTML = NAV.map(([sec, ic, items]) => `<div class="sec"><div class="sech">${ic}${sec}<svg class="i ch" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m7 14 5-5 5 5"/></svg></div>
+    <div class="tree" style="height:${items.length * 39 - 3}px">${tree(items.length)}${items.map(([h, t, i, b]) => `<a class="nl" href="${h}">${i}<span>${t}</span>${b ? `<span class="bd">${b}</span>` : ''}</a>`).join('')}</div></div>`).join('');
+  $$('.sech').forEach(s => s.onclick = () => s.parentElement.classList.toggle('closed'));
+}
+function active() { const h = location.hash; $$('.nl').forEach(a => { const p = a.getAttribute('href').split('/')[1]; a.classList.toggle('on', h.split('/')[1] === p); }); }
+function band(crumb, title, act = '') { return `<div class="band"><div><div class="crumb">${crumb}</div><h1>${title}</h1></div><div class="act">${act}</div></div>`; }
+function count(el, to, ms = 1400, f = fmt) { const t0 = performance.now(); (function k() { const p = Math.min(1, (performance.now() - t0) / ms); el.textContent = f(Math.round(to * (1 - (1 - p) ** 3))); if (p < 1) requestAnimationFrame(k); })(); }
+function keyed(prompt, keys) { let s = prompt; keys.forEach((k, i) => s = s.replace(k, `\u0001${i}\u0002`)); return s.replace(/\u0001(\d)\u0002/g, (_, i) => `<span class="k">${keys[i]}</span>`); }
+function card(v, qid) {
+  const lab = Q[qid].label, said = v.said && v.said.text;
+  const tag = lab === 'seen' ? '<b>SEEN</b><br>Air Jordan · visual match' : said ? `<b>SAID ${mmss(v.said.t0)}</b><br>“${said.length > 44 ? said.slice(0, 42) + '…' : said}”` : `<b>MATCHED</b><br>${v.cap.slice(0, 40)}`;
+  const fr = ['thumb', ...v.frames];
+  return `<a class="card" href="#/video/${v.id}" data-id="${v.id}"><img src="media/${v.id}/thumb.webp" alt=""><div class="scrim"></div>
+    <div class="top">${v.p === 'tiktok' ? TT : IG}${v.views ? fmt(v.views) : ''}</div><div class="scrub">${fr.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>
+    <div class="tag">${tag}</div><div class="who"><img src="media/pfp/${v.h}.webp" alt="">@${v.h}</div></a>`;
+}
+function bindCards(root) {
+  [...root.querySelectorAll('.card')].forEach((c, i) => { setTimeout(() => c.classList.add('in'), 60 + i * 45);
+    const v = VID[c.dataset.id], fr = ['thumb', ...v.frames], img = c.querySelector('img'), bars = c.querySelectorAll('.scrub i'); if (fr.length < 2) return;
+    c.onpointerenter = () => fr.forEach(f => { new Image().src = `media/${v.id}/${f}.webp`; });
+    c.onpointermove = e => { const r = c.getBoundingClientRect(), k = Math.min(fr.length - 1, Math.floor((e.clientX - r.left) / r.width * fr.length)); img.src = `media/${v.id}/${fr[k]}.webp`; bars.forEach((b, j) => b.classList.toggle('on', j === k)); };
+    c.onpointerleave = () => { img.src = `media/${v.id}/thumb.webp`; bars.forEach((b, j) => b.classList.toggle('on', !j)); }; });
+}
+function toast(m = 'Demo preview <i>— available on real accounts</i>') { const t = $('#toast'); t.innerHTML = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2600); }
+function route(text) { const s = text.toLowerCase(); return /matcha/.test(s) ? 'Q1' : /sephora/.test(s) ? 'Q2' : /jordan|nike|sneaker|shoe/.test(s) ? 'Q3' : /champagne|f1|formula|podium/.test(s) ? 'Q4' : null; }
+
+// ---------- views ----------
+const V = {
+  search() {
+    const recent = DATA.queries.map(q => { const v = VID[Q[q.id].thumb]; return `<a class="row" href="#/results/${q.id}"><div class="th"><img src="media/${v.id}/thumb.webp" alt=""></div><div class="t">${Q[q.id].name}<small>${q.prompt}</small></div><div class="n">${Q[q.id].total ? Q[q.id].total.toLocaleString('en') + ' videos' : fmt(Q[q.id].stats[0][1]) + ' views'}</div><span class="go2">→</span></a>`; }).join('');
+    return band('Discover', 'Search') + `<div class="pg"><div class="srch"><h2>What videos do you need today?</h2>
+      <form class="bar" id="sbar" autocomplete="off"><span class="sp">✦</span><input id="sq" placeholder="Describe the videos — what is seen, said or written"><button class="go">${UP}</button></form>
+      <div class="try">${Object.entries(Q).map(([id, q]) => `<button class="sug" data-q="${id}">${q.name}</button>`).join('')}</div>
+      <div class="recent"><div class="lbl" style="padding:0 14px 8px">Recent searches · this account</div>${recent}</div></div></div>`;
+  },
+  results(id = 'Q3') {
+    const q = Q[id], data = DATA.queries.find(x => x.id === id), vids = q.order ? q.order.map(x => VID[x]) : data.videos;
+    return band('Discover · Results', q.name, `<button class="btn" data-demo>${IC.dl}Export CSV</button><button class="btn dk" data-demo>Save search</button>`) +
+      `<div class="pg"><div class="q" id="qq">${keyed(data.prompt, q.keys)}</div><div class="chips" id="chips">${q.chips.map(([k, v]) => `<span class="chip"><span class="k">${k}</span>${v}</span>`).join('')}</div>
+      <div class="stats" id="stats">${q.stats.map(([l]) => `<div class="stat"><div class="v">0</div><div class="lbl">${l}</div></div>`).join('')}</div>
+      <div class="tools"><span class="sel">${IC.grid.replace('class="i"', 'class="i" style="width:14px;height:14px"')}${q.sort}</span><span class="sel">TikTok · Instagram</span><span class="lbl" style="margin-left:auto">Showing ${vids.length} of ${q.total ? q.total.toLocaleString('en') : 'all'}</span></div>
+      <div class="grid" id="grid">${vids.map(v => card(v, id)).join('')}${q.total ? `<div class="more"><b>+${(q.total - vids.length).toLocaleString('en')}</b>more videos</div>` : ''}</div></div>`;
+  },
+  video(id = '7683582634810789141') {
+    const v = VID[id], q = Q[v.q], dur = Math.max(v.dur || 30, 1), said = v.said;
+    const nf = v.frames.map(f => ({ f, t: +f.split('_')[1] }));
+    const written = v.q === 'Q1' ? '<div class="no">✕ “matcha” is not in the caption</div>' : v.q === 'Q3' ? '<div class="no">✕ Nike, Jordan, AJ1… not in caption or hashtags</div>' : v.q === 'Q2' ? `<div class="ok">${/sephora/i.test(v.cap) ? '✓ caption names Sephora' : '✕ caption never names Sephora'}</div>` : `<div class="ok">${v.cap.slice(0, 60)}</div>`;
+    const saidLane = said ? `<div class="seg" style="left:${said.t0 / dur * 100}%;width:${Math.max(.8, (said.t1 - said.t0) / dur * 100)}%"><span>${mmss(said.t0)} “${said.text.length > 40 ? said.text.slice(0, 38) + '…' : said.text}”</span></div>` : v.q === 'Q3' ? '<div class="no">✕ brand never said</div>' : '<div class="ok">—</div>';
+    const er = v.views ? (v.likes / v.views * 100).toFixed(1) + '%' : '—';
+    const words = said ? said.text : '';
+    const kw = v.q === 'Q1' ? /matcha/gi : /sephora/gi;
+    return band(`Discover · ${q.name}`, '@' + v.h, `<a class="btn" href="#/results/${v.q}">← Results</a><button class="btn" data-demo>Open on ${v.p === 'tiktok' ? 'TikTok' : 'Instagram'}</button>`) +
+      `<div class="pg"><div class="vd"><div class="player" id="player"><img id="pimg" src="media/${v.id}/thumb.webp" alt=""><div class="tc" id="tc">0:00 / ${mmss(dur)}</div><div class="sub" id="sub">${words.replace(kw, m => `<em>${m}</em>`)}</div></div>
+      <div><div class="meta"><img src="media/pfp/${v.h}.webp" alt=""><div><b>@${v.h}</b><small>${fmt(v.fol)} followers · ${v.p === 'tiktok' ? 'TikTok' : 'Instagram'}</small></div></div>
+      <div class="kv"><div><div class="v">${v.views ? fmt(v.views) : '—'}</div><div class="lbl">Views</div></div><div><div class="v">${fmt(v.likes)}</div><div class="lbl">Likes</div></div><div><div class="v">${er}</div><div class="lbl">Likes / views</div></div><div><div class="v">${mmss(dur)}</div><div class="lbl">Length</div></div></div>
+      <div class="panel tracks" id="tracks"><div class="lbl" style="margin-bottom:12px">What Oriane read in this video</div>
+        <div class="trk"><div class="nm">Seen</div><div class="lane" data-lane>${nf.map(o => `<div class="fr" style="left:${o.t / dur * 100}%"><img src="media/${v.id}/${o.f}.webp" alt=""></div>`).join('')}<div class="ph" id="ph1"></div></div></div>
+        <div class="trk"><div class="nm">Said</div><div class="lane" data-lane>${saidLane}<div class="ph" id="ph2"></div></div></div>
+        <div class="trk"><div class="nm">Written</div><div class="lane" data-lane>${written}<div class="ph" id="ph3"></div></div></div>
+        <div class="ruler"><span></span><div><span>0:00</span><span>${mmss(dur / 2)}</span><span>${mmss(dur)}</span></div></div></div>
+      <div class="frames">${nf.map(o => `<div class="f" data-t="${o.t}"><img src="media/${v.id}/${o.f}.webp" alt=""><span>${mmss(o.t)}</span></div>`).join('')}</div>
+      <div class="panel tx"><div class="lbl" style="margin-bottom:8px">Caption</div>${v.cap}${said ? `<div class="lbl" style="margin:16px 0 8px">Transcript · ${mmss(said.t0)}–${mmss(said.t1)}</div>${said.text.replace(kw, m => `<mark>${m}</mark>`)}` : ''}</div></div></div></div>`;
+  },
+  shadow() {
+    return band('Insights', 'Shadow Reach®', `<button class="btn dk" data-demo>Run for your brand</button>`) +
+      `<div class="pg"><div class="sr"><div class="panel" id="dotsp"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:17px;font-weight:500">One brand, Grüns, measured both ways</div>
+        <div class="legend"><span><i style="background:var(--ink)"></i>Found by caption tools</span><span><i style="background:var(--sig)"></i>Found only by Oriane</span></div></div>
+        <canvas id="dots"></canvas><div class="cnt"><div><div class="v" id="c1">0</div><div class="lbl">Videos caption tools find</div></div><div><div class="v s" id="c2">0</div><div class="lbl">Videos Oriane finds</div></div><div><div class="v" id="c3">0×</div><div class="lbl">More of the conversation</div></div></div></div>
+      <div style="display:flex;flex-direction:column;gap:24px"><div class="panel"><div class="lbl">Brand video exposure that is untagged</div><div class="big" id="pct" style="margin-top:12px">0%</div>
+        <p style="font-size:13.5px;color:var(--soft);line-height:1.5;margin-top:10px">Across the brands Oriane has measured, most exposure lives in what creators show and say, not in what they write.</p></div>
+        <div class="panel"><div class="lbl">From this account · last 3 months</div><div class="hb" id="hb">
+        ${[['Matcha said, never captioned', 2916456884, '2.92B views'], ['Sephora said out loud', 2977895522, '2.98B views'], ['Air Jordans, brand never named', 99674336, '99.7M views'], ['F1 champagne showers', 34784533, '34.8M views']].map(([l, n, t]) => `<div class="r"><div class="l">${l}<span>${t}</span></div><div class="bar2"><i style="transform:scaleX(0)" data-w="${Math.max(.02, n / 2977895522)}"></i></div></div>`).join('')}</div></div></div></div></div>`;
+  },
+  ask() {
+    const sig = [['Matcha is said in 18,318 videos that never write it', '2.92B views · last 3 months'], ['185 videos show Air Jordans and never name the brand', '99.7M views · visual match ≥ 0.85'], ['Sephora said out loud: 2.98B views', '137.2M interactions']];
+    return band('Insights', 'Ask Oriane') + `<div class="pg"><div class="ask"><div style="display:flex;flex-direction:column;min-height:0"><div class="thread" id="thread"></div>
+      <form class="bar askbar" id="abar" autocomplete="off"><span class="sp">✦</span><input id="aq" placeholder="Ask about any search, creator or brand"><button class="go">${UP}</button></form></div>
+      <div class="rail"><div class="panel"><div class="lbl" style="margin-bottom:6px">Oriane noticed</div>${sig.map(([a, b]) => `<div class="sig"><b>${a}</b><small>${b}</small></div>`).join('')}</div></div></div></div>`;
+  },
+  creators() {
+    return band('Insights', 'Creators', `<button class="btn" data-demo>${IC.dl}Export CSV</button>`) + `<div class="pg"><div class="panel" style="padding:6px 8px"><table id="ct"></table></div></div>`;
+  },
+  exports() {
+    const rows = DATA.queries.map(q => `<div class="row" data-demo><div class="th"><img src="media/${Q[q.id].thumb}/thumb.webp" alt=""></div><div class="t">${Q[q.id].name}<small>CSV · up to 10,000 rows · views, creators, timed transcripts, matched frames</small></div><button class="btn">${IC.dl}Export</button></div>`).join('');
+    return band('Build', 'Exports') + `<div class="pg"><div class="panel" style="padding:8px;max-width:1000px">${rows}</div></div>`;
+  },
+  api() {
+    return band('Build', 'API & MCP', `<button class="btn dk" data-demo>Create API key</button>`) + `<div class="pg"><div class="api"><div><div class="tabs" id="tabs"><button class="on" data-t="rest">REST</button><button data-t="mcp">MCP</button><button data-t="csv">CSV</button></div><pre id="code"></pre></div>
+      <div class="panel" style="padding:22px"><div class="lbl">Everything in the app, as JSON</div><p style="font-size:14px;line-height:1.55;color:var(--soft);margin-top:10px">Timed transcripts, matched frames, views and creators for every result. Or plug Oriane into Claude through MCP and ask in plain words.</p>
+      <div class="lbl" style="margin-top:22px">Pricing</div><p style="font-size:14px;line-height:1.7;margin-top:8px">Free · 250 credits<br>Plus · $25/mo, 700 credits<br>Pro · $249/mo, 8,000 credits<br>Enterprise · from $75/seat</p></div></div></div>`;
+  },
+};
+const CODE = {
+  rest: `<button class="cp" data-copy>Copy</button><span class="c"># Said “matcha”, never captioned — the filter Oriane compiled</span>
+<span class="k">POST</span> https://connect.oriane.xyz/rest/contents/search?sort=viewsCount
+
+{
+  <span class="s">"name"</span>: <span class="s">"Said matcha, never captioned"</span>,
+  <span class="s">"filters"</span>: {
+    <span class="s">"transcript"</span>:  { <span class="s">"includesExactly"</span>: { <span class="s">"values"</span>: [<span class="o">"matcha"</span>], <span class="s">"operator"</span>: <span class="s">"or"</span> } },
+    <span class="s">"caption"</span>:     { <span class="s">"excludesExactly"</span>: { <span class="s">"values"</span>: [<span class="o">"matcha"</span>], <span class="s">"operator"</span>: <span class="s">"or"</span> } },
+    <span class="s">"platform"</span>:    { <span class="s">"includes"</span>: [<span class="s">"tiktok"</span>, <span class="s">"instagram"</span>] },
+    <span class="s">"publishedAt"</span>: { <span class="s">"after"</span>: <span class="s">"2026-07-29"</span>, <span class="s">"before"</span>: <span class="s">"2026-10-29"</span> }
+  }
+}
+
+<span class="c"># → 18,318 videos · 2.92B views · each with timed transcript chunks and frames</span>`,
+  mcp: `<button class="cp" data-copy>Copy</button><span class="c"># Claude, with the Oriane MCP server connected</span>
+
+<span class="k">You</span>     Find TikToks and Reels that show Air Jordans
+        but never name the brand. Last 3 months.
+
+<span class="k">Claude</span>  <span class="c">→ oriane.contents.search</span>
+        caption <span class="o">✕</span> Nike, Jordan, AJ1 · seen <span class="o">≈</span> Air Jordan ≥ 0.85
+        <span class="s">185 videos · 99.7M views</span>`,
+  csv: `<button class="cp" data-copy>Copy</button><span class="c"># unmentioned-air-jordans.csv — up to 10,000 rows</span>
+platform,handle,followers,views,likes,caption
+`,
+};
+const QV = id => (Q[id].order ? Q[id].order.map(x => VID[x]) : DATA.queries.find(x => x.id === id).videos);
+
+// ---------- behaviour per view ----------
+const AFTER = {
+  search() {
+    $('#sbar').onsubmit = e => { e.preventDefault(); const id = route($('#sq').value); if (id) location.hash = '#/results/' + id; else toast('Demo preview <i>— try matcha, Sephora, Air Jordans or F1</i>'); };
+    $$('.sug').forEach(b => b.onclick = () => location.hash = '#/results/' + b.dataset.q);
+  },
+  async results(id = 'Q3') {
+    const q = Q[id]; $$('#qq .k').forEach((k, i) => setTimeout(() => k.classList.add('lit'), 250 + i * 220));
+    $$('#chips .chip').forEach((c, i) => setTimeout(() => c.classList.add('on'), 600 + i * 80));
+    $$('#stats .v').forEach((el, i) => { const [, to, f = fmt] = q.stats[i]; setTimeout(() => count(el, to, 1400, f), 700); });
+    bindCards($('#grid'));
+  },
+  video(id = '7683582634810789141') {
+    const v = VID[id], dur = Math.max(v.dur || 30, 1), fr = v.frames.map(f => ({ f, t: +f.split('_')[1] })), said = v.said;
+    let t = Math.max(0, (said ? said.t0 : 0) - 3), last = performance.now(), rate = dur / 12;
+    const tick = now => { if (!$('#pimg')) return; t = (t + (now - last) / 1000 * rate) % dur; last = now; draw(); requestAnimationFrame(tick); };
+    const draw = () => { const x = t / dur * 100 + '%'; ['#ph1', '#ph2', '#ph3'].forEach(s => $(s).style.left = x); $('#tc').textContent = `${mmss(t)} / ${mmss(dur)}`;
+      let cur = 'thumb'; fr.forEach(o => { if (o.t <= t) cur = o.f; }); const src = `media/${v.id}/${cur}.webp`; if (!$('#pimg').src.endsWith(src)) $('#pimg').src = src;
+      $$('.frames .f').forEach(f => f.classList.toggle('on', 'media/' + v.id + '/' + cur + '.webp' === src && +f.dataset.t === (fr.find(o => o.f === cur) || {}).t));
+      $('#sub').classList.toggle('on', !!said && t >= said.t0 - .3 && t <= Math.max(said.t1, said.t0 + 2.5)); };
+    requestAnimationFrame(tick);
+    $$('[data-lane]').forEach(l => l.onclick = e => { const r = l.getBoundingClientRect(); t = (e.clientX - r.left) / r.width * dur; });
+    $$('.frames .f').forEach(f => f.onclick = () => t = +f.dataset.t);
+  },
+  shadow() {
+    const cv = $('#dots'), r = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1; cv.width = r.width * dpr; cv.height = r.height * dpr; const x = cv.getContext('2d'); x.scale(dpr, dpr);
+    const N = 1426, A = 117, cols = Math.ceil(r.width / Math.sqrt(r.width * r.height / N * .97)), sz = r.width / cols, order = Array.from({ length: N }, (_, i) => i);
+    const ink = new Set(); while (ink.size < A) ink.add(Math.random() * N | 0);
+    const t0 = performance.now();
+    (function f() { if (!document.body.contains(cv)) return; const e = (performance.now() - t0) / 1000; x.clearRect(0, 0, r.width, r.height);
+      order.forEach(i => { const cx = (i % cols) * sz + sz / 2, cy = Math.floor(i / cols) * sz + sz / 2, isInk = ink.has(i);
+        const p = isInk ? Math.min(1, Math.max(0, (e - .2) / .5)) : Math.min(1, Math.max(0, (e - 1.4 - (i % cols) / cols * .9 - Math.floor(i / cols) * .012) / .35));
+        x.beginPath(); x.arc(cx, cy, sz * .3, 0, 7); x.fillStyle = '#EAE8E2'; x.fill();
+        if (p > 0) { x.beginPath(); x.arc(cx, cy, sz * .3 * p, 0, 7); x.fillStyle = isInk ? '#111110' : '#FF4F00'; x.fill(); } });
+      if (e < 4) requestAnimationFrame(f); })();
+    setTimeout(() => count($('#c1'), 117, 700, n => n), 200); setTimeout(() => count($('#c2'), 1426, 1600, n => n.toLocaleString('en')), 1400); setTimeout(() => count($('#c3'), 122, 1600, n => (n / 10).toFixed(1) + '×'), 1600);
+    setTimeout(() => count($('#pct'), 76, 1500, n => n + '%'), 400);
+    setTimeout(() => $$('#hb i').forEach((b, i) => setTimeout(() => b.style.transform = `scaleX(${b.dataset.w})`, i * 120)), 500);
+  },
+  ask() {
+    const flow = [
+      { q: 'Which creators drove the most views on unmentioned Air Jordans?', id: 'Q3', head: v => `@${v[0].h} leads with ${fmt(v[0].views)} views — Jordans on screen, the brand never named.`, eye: 'VIEWS · UNMENTIONED AIR JORDANS · TOP 5' },
+      { q: 'And where is matcha said the most, without being captioned?', id: 'Q1', head: v => `@${v[0].h}: ${fmt(v[0].views)} views, “${v[0].said.text}” — matcha never written.`, eye: 'VIEWS · SAID “MATCHA”, NEVER CAPTIONED · TOP 5' },
+    ];
+    let k = 0, alive = true; const th = $('#thread');
+    const answer = async (f) => {
+      th.insertAdjacentHTML('beforeend', `<div class="ub">${f.q}</div>`); await wait(450);
+      th.insertAdjacentHTML('beforeend', `<div class="spin" id="spn"></div>`); await wait(1100); $('#spn')?.remove();
+      const top = DATA.queries.find(q => q.id === f.id).videos.filter(v => v.views).sort((a, b) => b.views - a.views).slice(0, 5), mx = top[0].views;
+      th.insertAdjacentHTML('beforeend', `<div class="panel ans"><div class="lbl">${f.eye}</div><h4>${f.head(top)}</h4>
+        <div class="bars">${top.map((v, i) => `<div><b>${fmt(v.views)}</b><i style="height:${Math.max(6, v.views / mx * 100)}%;animation-delay:${i * 90}ms"></i><span>@${v.h}</span></div>`).join('')}</div>
+        <div class="vids">${top.map(v => `<a href="#/video/${v.id}"><img src="media/${v.id}/thumb.webp" alt=""></a>`).join('')}</div></div>`);
+      th.scrollTop = th.scrollHeight; };
+    const play = async () => { for (const f of flow) { if (!alive || !$('#aq')) return; const inp = $('#aq'); inp.value = ''; for (const c of f.q) { if (!alive) return; inp.value += c; await wait(28); } await wait(800); if (!alive) return; inp.value = ''; await answer(f); await wait(2600); } };
+    play();
+    $('#aq').addEventListener('focus', () => { alive = false; });
+    $('#abar').onsubmit = e => { e.preventDefault(); alive = false; const s = $('#aq').value.trim(); if (!s) return; $('#aq').value = ''; const id = route(s);
+      if (id) answer({ q: s, id, head: v => `@${v[0].h} tops “${Q[id].name}” with ${fmt(v[0].views)} views.`, eye: 'VIEWS · ' + Q[id].name.toUpperCase() + ' · TOP 5' }); else toast('Demo preview <i>— ask about matcha, Sephora, Air Jordans or F1</i>'); };
+  },
+  creators() {
+    const by = {}; ALL.forEach(v => { const o = by[v.h] ||= { h: v.h, p: v.p, fol: v.fol, views: 0, likes: 0, n: 0, qs: new Set() }; o.views += v.views; o.likes += v.likes; o.n++; o.qs.add(Q[v.q].name); });
+    let rows = Object.values(by), key = 'views';
+    const cols = [['h', 'Creator'], ['p', 'Platform'], ['fol', 'Followers'], ['views', 'Views'], ['er', 'Likes / views'], ['qs', 'Found in'], ['x', '']];
+    const draw = () => { rows.sort((a, b) => key === 'er' ? (b.likes / (b.views || 1)) - (a.likes / (a.views || 1)) : (b[key] || 0) - (a[key] || 0));
+      $('#ct').innerHTML = `<tr>${cols.map(([k, l]) => `<th data-k="${k}" class="${k === key ? 's' : ''}">${l}</th>`).join('')}</tr>` + rows.map(o => `<tr><td><div class="h"><img src="media/pfp/${o.h}.webp" alt="">@${o.h}</div></td><td class="pl">${o.p === 'tiktok' ? TT + ' TikTok' : IG + ' Instagram'}</td><td>${fmt(o.fol)}</td><td>${o.views ? fmt(o.views) : '—'}</td><td>${o.views ? (o.likes / o.views * 100).toFixed(1) + '%' : '—'}</td><td><span class="q2">${[...o.qs].join(' · ')}</span></td><td><button class="btn ra" data-demo>Add to list</button></td></tr>`).join('');
+      $$('#ct th').forEach(h => h.onclick = () => { if (['fol', 'views', 'er'].includes(h.dataset.k)) { key = h.dataset.k; draw(); } }); };
+    draw();
+  },
+  api() { const set = t => { $('#code').innerHTML = CODE[t]; $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t)); }; set('rest'); $$('#tabs button').forEach(b => b.onclick = () => set(b.dataset.t)); },
+};
+
+function render() {
+  const [, view = 'search', arg] = (location.hash || '#/search').split('/'); const fn = V[view] ? view : 'search';
+  $('#main').innerHTML = V[fn](arg); $('#main').scrollTop = 0; active(); AFTER[fn] && AFTER[fn](arg);
+}
+document.addEventListener('click', e => { const d = e.target.closest('[data-demo]'); if (d) { e.preventDefault(); toast(); } const c = e.target.closest('[data-copy]'); if (c) { c.textContent = 'Copied'; setTimeout(() => c.textContent = 'Copy', 1400); } });
+
+// ---------- guided tour (Convu: 01 / N, segmented progress, page-driving spotlight) ----------
+const STEPS = [
+  ['#/search', '#sbar', 'Ask in plain words', 'Describe the videos you need: what is seen in the frame, said out loud or written in the caption.'],
+  ['#/results/Q3', '#chips', 'Your sentence becomes a real filter', 'Oriane compiled this one itself: Air Jordans seen in the frame, the brand never written, tagged, said or mentioned.'],
+  ['#/results/Q3', '#stats', 'Counted across TikTok and Instagram', '185 videos and 99.7M views in the last 3 months, without one mention of the brand.'],
+  ['#/results/Q3', '#grid .card', 'Every result is a real video', 'Hover a card to scrub the frames Oriane indexed. Click one to open it.'],
+  ['#/video/7683582634810789141', '#tracks', 'Seen, said and written', '“Matcha” is said at 0:27 and never written in the caption. Caption tools never see this video.'],
+  ['#/shadow', '#dotsp', 'Shadow Reach®', 'One brand, Grüns: caption tools found 117 videos. Oriane found 1,426.'],
+  ['#/ask', '.ask', 'Ask Oriane', 'Questions come back as numbers, charts and the videos behind them.'],
+  ['#/api', '#code', 'Into your own stack', 'The same search as one API call, an MCP server for Claude, or a CSV of up to 10,000 rows.'],
+];
+let step = -1;
+async function go(i) {
+  step = i; if (i < 0 || i >= STEPS.length) return endTour();
+  const [h, sel, t, p] = STEPS[i];
+  $('#tour').classList.remove('off');
+  $('#tour').innerHTML = `<div class="hd"><span class="n">${String(i + 1).padStart(2, '0')} / ${String(STEPS.length).padStart(2, '0')}</span><button class="x" id="tx">✕</button></div><h3>${t}</h3><p>${p}</p>
+    <div class="seg">${STEPS.map((_, k) => `<i class="${k <= i ? 'on' : ''}"></i>`).join('')}</div><div class="nav"><button class="btn" id="tb" ${i ? '' : 'style="visibility:hidden"'}>Back</button><button class="btn dk" id="tn">${i === STEPS.length - 1 ? 'Finish' : 'Next'}</button></div>`;
+  $('#tb').onclick = () => go(i - 1); $('#tn').onclick = () => go(i + 1); $('#tx').onclick = endTour;
+  if (location.hash !== h) { location.hash = h; await wait(60); }
+  await wait(sel === '#stats' || sel === '#chips' ? 700 : 350);
+  const el = $(sel); if (!el || step !== i) return; el.scrollIntoView({ block: 'nearest' });
+  const r = el.getBoundingClientRect(), pad = 10; Object.assign($('#spot').style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: r.width + pad * 2 + 'px', height: Math.min(r.height, innerHeight - r.top - 20) + pad * 2 + 'px' }); $('#spot').classList.add('on');
+}
+function endTour() { step = -1; $('#tour').classList.add('off'); $('#spot').classList.remove('on'); }
+$('#rt').onclick = () => go(0);
+addEventListener('keydown', e => { if (step < 0) return; if (e.key === 'ArrowRight') go(step + 1); if (e.key === 'ArrowLeft') go(step - 1); if (e.key === 'Escape') endTour(); });
+
+fetch('data.json').then(r => r.json()).then(d => {
+  DATA = d; ALL = d.queries.flatMap(q => q.videos.map(v => ({ ...v, q: q.id }))); ALL.forEach(v => VID[v.id] = v);
+  CODE.csv = CODE.csv + QV('Q3').slice(0, 6).map(v => [v.p, '@' + v.h, v.fol, v.views, v.likes, '"' + v.cap.slice(0, 28).replace(/"/g, '') + '…"'].join(',')).join('\n');
+  sidebar(); addEventListener('hashchange', render); render();
+  if (new URLSearchParams(location.search).get('tour') !== '0') setTimeout(() => go(0), 900);
+});
+</script></body></html>

@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oriane — You point, it finds</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F5F4F0;--ink:#111110;--soft:#6B6A66;--mute:#9C9A94;--hair:#E3E1DB;--sig:#FF4F00;--card:#fff;
+  --e:cubic-bezier(.7,0,.2,1);--o:cubic-bezier(.2,.9,.3,1);
+  --sh:0 24px 48px -12px rgba(17,17,16,.10),0 8px 16px -4px rgba(17,17,16,.04),0 3px 4px rgba(17,17,16,.04),0 1px 1px rgba(17,17,16,.06),0 0 0 1px rgba(17,17,16,.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Geist,system-ui,sans-serif;background:var(--paper);color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased;font-feature-settings:"ss01"}
+.mono{font-family:'Geist Mono',ui-monospace,monospace}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* nav */
+.nav{position:fixed;inset:0 0 auto;height:64px;display:flex;align-items:center;padding:0 32px;z-index:40;font-size:14px}
+.nav .logo{height:18px}
+.nav .links{display:flex;gap:28px;margin-left:56px;color:var(--soft)}
+.nav .links a,.nav .r a{cursor:pointer;transition:color .2s}.nav .links a:hover{color:var(--ink)}
+.nav .r{margin-left:auto;display:flex;gap:20px;align-items:center;color:var(--soft)}
+.pill{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 16px;border-radius:999px;background:var(--ink);color:#fff;font-weight:500;font-size:13.5px;box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 4px 10px -2px rgba(17,17,16,.25)}
+
+/* wall */
+#wall{position:fixed;inset:0;z-index:1;transition:opacity .9s var(--e)}
+.t{position:absolute;left:0;top:0;width:120px;height:213px;border-radius:12px;overflow:hidden;background:#E7E5DF;will-change:transform,opacity;
+  box-shadow:0 10px 24px -8px rgba(17,17,16,.22),0 0 0 1px rgba(17,17,16,.05);transform-origin:50% 50%}
+.t img{width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none}
+.t.fly{transition:transform 0.95s var(--e),width .95s var(--e),height .95s var(--e),border-radius .95s var(--e),opacity .6s;cursor:pointer}
+.t.card{border-radius:14px;box-shadow:0 1px 2px rgba(17,17,16,.06),0 0 0 1px rgba(17,17,16,.06)}
+.t.card:hover{box-shadow:0 18px 40px -12px rgba(17,17,16,.28),0 0 0 1px rgba(17,17,16,.08)}
+.t .info{position:absolute;inset:0;opacity:0;transition:opacity .5s;pointer-events:none;color:#fff}
+.t.card .info{opacity:1}
+.t .scrim{position:absolute;inset:auto 0 0;height:56%;background:linear-gradient(to top,rgba(10,10,9,.82),rgba(10,10,9,.35) 55%,rgba(10,10,9,0))}
+.t .top{position:absolute;left:10px;top:10px;right:10px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.t .top svg{width:14px;height:14px;flex:none}
+.t .tag{position:absolute;left:10px;right:10px;bottom:40px;font-size:12px;line-height:1.35}
+.t .tag b{display:inline-block;font:500 10.5px 'Geist Mono';letter-spacing:.06em;background:var(--sig);color:#fff;padding:2px 6px;border-radius:4px;margin-bottom:5px}
+.t .who{position:absolute;left:10px;right:10px;bottom:11px;display:flex;align-items:center;gap:7px;font-size:12px;opacity:.92}
+.t .who img{width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.5)}
+.t .scrub{position:absolute;left:10px;right:10px;top:34px;height:2px;display:flex;gap:3px;opacity:0;transition:opacity .2s}
+.t .scrub i{flex:1;background:rgba(255,255,255,.35);border-radius:2px}.t .scrub i.on{background:#fff}
+.t.card:hover .scrub{opacity:1}
+.more{position:absolute;border-radius:14px;border:1px dashed #CFCCC4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--soft);font-size:13px;opacity:0;transition:opacity .6s;z-index:5}
+.more b{font-weight:400;font-size:30px;color:var(--ink);letter-spacing:-.02em}
+
+/* hero */
+.hero{position:fixed;left:0;right:0;top:calc(41% - 120px);z-index:10;text-align:center;pointer-events:none;transition:top 1s var(--e)}
+.hero > *{pointer-events:auto}
+h1{font-weight:400;font-size:64px;letter-spacing:-.035em;line-height:1.06}
+h1 .l1{display:block;transition:opacity .5s,filter .5s}
+.slot{display:grid;justify-items:center;perspective:700px;height:72px;align-items:center}
+.slot > *{grid-area:1/1;display:inline-flex;align-items:center;gap:16px;white-space:nowrap;transform-origin:50% 50%;backface-visibility:hidden}
+.slot .th{width:46px;height:62px;border-radius:10px;overflow:hidden;border:2px solid #fff;box-shadow:0 6px 14px -4px rgba(17,17,16,.3);transform:rotate(-6deg)}
+.slot .th img{width:100%;height:100%;object-fit:cover}
+.in{animation:rin .75s var(--o) both}.out{animation:rout .55s var(--e) both}
+@keyframes rin{from{opacity:0;transform:translateY(55%) rotateX(-85deg);filter:blur(10px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes rout{to{opacity:0;transform:translateY(-55%) rotateX(85deg);filter:blur(10px)}}
+.sent{position:absolute;left:0;right:0;top:0;font-weight:400;font-size:56px;letter-spacing:-.033em;line-height:1.12;padding:0 120px;transition:font-size 1s var(--e),transform 1s var(--e)}
+.sent .w{display:inline-block;white-space:pre}
+.sent .k{background:linear-gradient(90deg,var(--sig) 0 50%,var(--ink) 50% 100%);background-size:200% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;color:transparent;transition:background-position .7s var(--e)}
+.sent .k.lit{background-position:0 0}
+.chips{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:0 auto;max-width:1400px;min-height:34px}
+.chip{display:inline-flex;align-items:center;gap:9px;height:32px;padding:0 13px;border-radius:9px;background:#fff;font:400 13px 'Geist Mono';box-shadow:0 1px 2px rgba(17,17,16,.05),0 0 0 1px var(--hair);opacity:0;transform:translateY(-6px) scale(.98);filter:blur(2px);transition:all .45s var(--o)}
+.chip.on{opacity:1;transform:none;filter:none}
+.chip .k{color:var(--mute)}.chip .x{color:var(--sig)}.chip .ok{color:var(--sig)}
+.stats{display:flex;justify-content:center;gap:56px;margin-top:22px;opacity:0;transition:opacity .5s}
+.stats.on{opacity:1}
+.stat{text-align:center}.stat .v{font-size:30px;font-weight:300;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+.stat .l{font:400 11px 'Geist Mono';letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-top:2px}
+.foot{margin-top:18px;font:400 12px 'Geist Mono';color:var(--mute);letter-spacing:.02em;transition:opacity .4s}
+.back{position:fixed;left:40px;top:84px;z-index:30;font-size:13px;color:var(--soft);display:flex;gap:8px;align-items:center;opacity:0;pointer-events:none;transition:opacity .4s}
+.back.on{opacity:1;pointer-events:auto}.back:hover{color:var(--ink)}
+
+/* chat bar */
+.barwrap{position:fixed;left:50%;top:calc(41% + 22px);transform:translateX(-50%);z-index:30;width:660px;transition:top 1s var(--e),width 1s var(--e)}
+.bar{display:flex;align-items:center;gap:12px;height:60px;padding:0 10px 0 20px;background:rgba(255,255,255,.92);backdrop-filter:blur(14px) saturate(1.4);border-radius:18px;box-shadow:var(--sh);transition:box-shadow .3s}
+.bar:focus-within{box-shadow:var(--sh),0 0 0 4px rgba(255,79,0,.12)}
+.bar .sp{color:var(--sig);font-size:16px;flex:none}
+.bar input{flex:1;border:0;outline:0;background:none;font:400 17px Geist;color:var(--ink);min-width:0}
+.bar input::placeholder{color:#A8A6A0}
+.bar .pl{display:flex;gap:6px;color:var(--mute);flex:none}.bar .pl svg{width:16px;height:16px}
+.bar .go{width:40px;height:40px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center;flex:none;transition:transform .15s,background .2s}
+.bar .go:active,.bar .go.press{transform:scale(.92)}
+.bar .go svg{width:16px;height:16px}
+.sugs{display:flex;justify-content:center;gap:8px;margin-top:14px;transition:opacity .4s}
+.sug{height:30px;padding:0 12px;border-radius:999px;font-size:13px;color:var(--soft);background:rgba(255,255,255,.6);box-shadow:0 0 0 1px var(--hair);transition:all .2s;backdrop-filter:blur(6px)}
+.sug:hover{color:var(--ink);background:#fff}
+.docked .barwrap{top:calc(100% - 92px);width:720px}
+.fb{position:fixed;left:0;right:0;bottom:0;height:150px;z-index:25;pointer-events:none;background:linear-gradient(to top,var(--paper) 30%,rgba(245,244,240,0));opacity:0;transition:opacity .8s}
+.docked .fb{opacity:1}
+.ft{position:fixed;left:0;right:0;top:0;height:110px;z-index:20;pointer-events:none;background:linear-gradient(to bottom,var(--paper) 35%,rgba(245,244,240,0))}
+.docked .sugs,.docked .foot{opacity:0;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,10px);z-index:60;background:var(--ink);color:#fff;font-size:13.5px;padding:11px 16px;border-radius:12px;opacity:0;transition:all .35s var(--o);pointer-events:none;box-shadow:0 12px 30px -8px rgba(0,0,0,.4)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast i{font-style:normal;color:#A8A6A0;margin-left:6px}
+</style></head><body>
+<nav class="nav"><img class="logo" src="logo.svg" alt="Oriane">
+  <div class="links"><a data-t>Product</a><a data-t>Shadow Reach®</a><a data-t>Pricing</a><a data-t>API</a></div>
+  <div class="r"><a data-t>Log in</a><a class="pill" href="demo.html" style="color:#fff">Open the live demo →</a></div></nav>
+<div id="wall"></div>
+<section class="hero" id="hero">
+  <h1 id="h1"><span class="l1">Find every video that</span><span class="slot" id="slot"></span></h1>
+  <div class="sent" id="sent"></div>
+</section>
+<div class="barwrap" id="bw">
+  <form class="bar" id="bar" autocomplete="off"><span class="sp">✦</span><input id="q" placeholder="">
+    <span class="pl" title="TikTok · Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.1v12.4a2.6 2.6 0 1 1-1.8-2.5V9.7a5.7 5.7 0 1 0 4.9 5.7V9.1a7.3 7.3 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.3-1.6z"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".6" fill="currentColor"/></svg></span>
+    <button class="go" id="go" aria-label="Search"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5"/></svg></button></form>
+  <div class="sugs" id="sugs"></div>
+  <div class="foot" id="foot" style="text-align:center">TikTok and Instagram · millions of new videos a day · the last 3 months</div>
+</div>
+<button class="back" id="back">← New search</button>
+<div class="ft"></div><div class="fb"></div><div class="toast" id="toast"></div>
+<script>
+const P = new URLSearchParams(location.search), AUTO = P.get('auto') !== '0';
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const fmt = n => n >= 1e9 ? (n / 1e9).toFixed(2) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'K' : n.toLocaleString('en');
+const mmss = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+const $ = id => document.getElementById(id);
+const IG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/></svg>';
+const TT = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.1v12.4a2.6 2.6 0 1 1-1.8-2.5V9.7a5.7 5.7 0 1 0 4.9 5.7V9.1a7.3 7.3 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.3-1.6z"/></svg>';
+const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
+
+// Real searches from Amin's Oriane account (data.json); keys = words lit in signal orange; chips = the real compiled filter.
+const Q = {
+  Q1: { head: 'says “matcha”', hero: 'DejymSgxrrU', sug: 'Said “matcha”, never captioned', keys: ['matcha', 'said', 'not written'],
+    chips: [['said', '<span class="ok">✓</span> matcha'], ['caption', '<span class="x">✕</span> matcha'], ['published', 'last 3 months']],
+    stats: [['Videos', 18318, n => n.toLocaleString('en')], ['Views', 2916456884], ['Interactions', 165840985]], total: 18318 },
+  Q2: { head: 'says “Sephora”', hero: '7687623229917220116', sug: 'Sephora, said out loud', keys: ['Sephora', 'pronounced'],
+    chips: [['said', '<span class="ok">✓</span> Sephora'], ['matched', 'Spoken Sephora'], ['published', 'last 3 months']],
+    stats: [['Views', 2977895522], ['Interactions', 137213706]] },
+  Q3: { head: 'shows Air Jordans', hero: 'Dc4SC-Zsj6I', sug: 'Unmentioned Air Jordans', keys: ['Nike Air Jordans', 'zero mention'],
+    chips: [['seen', '<span class="ok">≈</span> Air Jordan ≥ 0.85'], ['caption', '<span class="x">✕</span> Nike, Jordan, AJ1 +3'], ['hashtags', '<span class="x">✕</span> #AirJordan +6'], ['said', '<span class="x">✕</span> Nike, Jordan +4'], ['mentions', '<span class="x">✕</span> @airjordans +10'], ['published', 'last 3 months']],
+    stats: [['Videos', 185, n => n], ['Views', 99674336], ['Interactions', 2557676]], total: 185,
+    order: ['Dc4SC-Zsj6I', 'DdeB2KZsm1V', '7681501875203607826', 'DdUfeMKRL8J', 'DcyZiRqu-O5', '7669955951100808481', 'DcoOwZjk2jl', '7681507639041330439', 'Dbr3veXJBJn', 'DdwTq9MoDf6', '7670950096749464854', 'DbvmS2oEQfZ', 'Dc5RHxEs8R8', 'Db8jAlqsfuB', 'Db_KtxDlT6p'] },
+  Q4: { head: 'sprays champagne on a podium', hero: 'DeYSoPhT4ML', sug: 'F1 champagne showers', keys: ['champagne showers', 'Instagram'],
+    chips: [['expanded', 'champagne shower · champagne spray · podium celebration · Moët · Ferrari Trento'], ['platform', 'Instagram']],
+    stats: [['Videos', 306, n => n], ['Views', 34784533], ['Interactions', 1118629]], total: 306 },
+};
+let DATA, ALL, theme = 'Q1', mode = 'wall', autoOn = AUTO;
+
+// ---------- the wall (cosmos.so numbers: baseVelocity .32, fade 8/8, burst ×24 · 0.7 s ramp · 3.2 s, sizeAttenuation .35) ----------
+let fadeTarget = 1; const tiles = []; let speed = 1, burstT = -1, wallA = 0, last = performance.now(), mx = 0, my = 0;
+const W = () => innerWidth, H = () => innerHeight;
+function pick(th) {
+  const shown = new Set(tiles.map(t => t.k));
+  const pool = Math.random() < (mode === 'burst' ? 1 : .5) ? ALL.filter(v => v.q === th) : ALL;
+  for (let k = 0; k < 20; k++) { const v = pool[Math.random() * pool.length | 0], f = k < 6 || !v.frames.length ? 'thumb' : v.frames[Math.random() * v.frames.length | 0]; if (!shown.has(v.id + f)) return [v, f]; }
+  return [pool[0], 'thumb'];
+}
+function spawn(t, z) {
+  let x, y; do { x = Math.random() * 2 - 1; y = Math.random() * 2 - 1; } while (Math.abs(x) < .36 && Math.abs(y) < .46);
+  [t.v, t.f] = pick(theme); t.k = t.v.id + t.f; t.img.src = `media/${t.v.id}/${t.f}.webp`;
+  Object.assign(t, { x, y, z: z ?? 1, r: (Math.random() - .5) * 26, vr: (Math.random() - .5) * 4, s: .86 + Math.random() * .34 });
+}
+function initWall() {
+  for (let i = 0; i < 52; i++) { const el = document.createElement('div'); el.className = 't'; el.innerHTML = '<img alt="">'; $('wall').appendChild(el);
+    const t = { el, img: el.firstChild }; spawn(t, (i + Math.random()) / 52); tiles.push(t); }
+  requestAnimationFrame(frame);
+}
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (burstT >= 0) { const e = (now - burstT) / 1000; speed = e < .7 ? 1 + 23 * (e / .7) ** 2 : e < 3.2 ? 1 + 23 * Math.pow(1 - (e - .7) / 2.5, 2.2) : (burstT = -1, 1); }
+  wallA += (fadeTarget - wallA) * Math.min(1, dt * (fadeTarget ? 2.2 : 4));
+  const cw = W() / 2, ch = H() * .5, hy = H() * .4;
+  for (const t of tiles) {
+    if (t.caught) continue;
+    t.z -= dt * .022 * speed; t.r += t.vr * dt * (1 + speed * .15);
+    if (t.z <= 0) spawn(t, 1);
+    const p = .6 + .55 * (1 - t.z) ** 1.4, size = t.s * (.72 + .35 * (1 - t.z));
+    const par = (1 - t.z) * 26;
+    const sx = cw + t.x * cw * 1.02 * p + mx * par, sy = ch + t.y * ch * 1.12 * p + my * par;
+    const fin = Math.min(1, (1 - t.z) * 12), fout = Math.min(1, t.z * 10);
+    const dx = (sx - cw) / 520, dy = (sy - hy) / 250, d = dx * dx + dy * dy;
+    const clear = Math.min(1, Math.max(0, (d - .62) / .3));
+    t.el.style.opacity = (fin * fout * clear * wallA).toFixed(3);
+    t.el.style.zIndex = 1 + ((1 - t.z) * 100 | 0);
+    t.el.style.transform = `translate3d(${(sx - 60).toFixed(1)}px,${(sy - 106).toFixed(1)}px,0) rotate(${t.r.toFixed(2)}deg) scale(${size.toFixed(3)})`;
+    t.sx = sx; t.sy = sy; t.sc = size;
+  }
+  requestAnimationFrame(frame);
+}
+addEventListener('pointermove', e => { mx = e.clientX / W() - .5; my = e.clientY / H() - .5; });
+
+// ---------- headline roll (cosmos variants: rotateX ∓85°, y ±55 %, blur 10 px) ----------
+function head(id) {
+  const q = Q[id], v = ALL.find(v => v.id === q.hero), old = $('slot').firstElementChild;
+  if (old) { old.className = 'out'; setTimeout(() => old.remove(), 560); }
+  const n = document.createElement('span'); n.className = 'in';
+  n.innerHTML = `${q.head}<span class="th"><img src="media/${v.id}/thumb.webp" alt=""></span>`; $('slot').appendChild(n);
+  $('q').placeholder = 'Search for videos that ' + q.head.replace(/[“”]/g, '');
+  theme = id;
+}
+
+// ---------- the search ----------
+async function ghost(text) { const q = $('q'); q.value = ''; for (const c of text) { if (!autoOn) return false; q.value += c; await wait(24 + Math.random() * 22); } return true; }
+async function run(id) {
+  if (mode !== 'wall') return; mode = 'burst';
+  const q = Q[id], data = DATA.queries.find(x => x.id === id), prompt = data.prompt;
+  theme = id; $('q').value = ''; $('q').blur(); $('go').classList.add('press'); setTimeout(() => $('go').classList.remove('press'), 160);
+  document.body.classList.add('docked'); $('back').classList.add('on');
+  // headline out, the typed sentence rolls in with its keywords lit
+  const l1 = document.querySelector('.l1'); l1.style.opacity = 0; l1.style.filter = 'blur(10px)';
+  const o = $('slot').firstElementChild; if (o) o.className = 'out';
+  let html = prompt; q.keys.forEach((k, i) => html = html.replace(k, `\u0001${i}\u0002`));
+  html = html.split(' ').map(w => `<span class="w">${w} </span>`).join('').replace(/\u0001(\d)\u0002/g, (_, i) => `<span class="k" data-i="${i}">${q.keys[i]}</span>`);
+  const s = $('sent'); await wait(300); s.innerHTML = `<div class="in">${html}</div><div class="chips" id="chips" style="margin-top:26px"></div><div class="stats" id="stats"></div>`;
+  burstT = performance.now();
+  await wait(420); [...s.querySelectorAll('.k')].forEach((k, i) => setTimeout(() => k.classList.add('lit'), i * 220));
+  await wait(200 + q.keys.length * 180);
+  $('hero').style.top = '92px'; s.style.fontSize = '34px';
+  const ch = $('chips'); ch.innerHTML = q.chips.map(([k, v]) => `<span class="chip"><span class="k">${k}</span>${v}</span>`).join('');
+  [...ch.children].forEach((c, i) => setTimeout(() => c.classList.add('on'), 120 + i * 85));
+  await wait(120 + q.chips.length * 60);
+  // stats count up
+  const st = $('stats'); st.innerHTML = q.stats.map(([l]) => `<div class="stat"><div class="v">0</div><div class="l">${l}</div></div>`).join(''); st.classList.add('on');
+  [...st.querySelectorAll('.v')].forEach((el, i) => { const [, to, f = fmt] = q.stats[i], t0 = performance.now(); (function k() { const p = Math.min(1, (performance.now() - t0) / 1500); el.textContent = f(Math.round(to * (1 - (1 - p) ** 3))); if (p < 1) requestAnimationFrame(k); })(); });
+  catchInto(id, data);
+}
+function slots(n) {
+  const cols = Math.max(3, Math.min(8, Math.floor((W() - 120) / 212))), cw = Math.min(200, (W() - 120 - (cols - 1) * 16) / cols), chh = cw * 16 / 9;
+  const x0 = (W() - (cols * cw + (cols - 1) * 16)) / 2, y0 = 318;
+  return Array.from({ length: n }, (_, i) => ({ x: x0 + (i % cols) * (cw + 16), y: y0 + Math.floor(i / cols) * (chh + 16), w: cw, h: chh }));
+}
+function cardHTML(v, id) {
+  const said = v.said && v.said.text, label = id === 'Q3' ? '<b>SEEN</b><br>Air Jordan · visual match' : said ? `<b>SAID ${mmss(v.said.t0)}</b><br>“${said.length > 44 ? said.slice(0, 42) + '…' : said}”` : `<b>MATCHED</b><br>${v.cap.slice(0, 40)}`;
+  return `<div class="info"><div class="scrim"></div><div class="top">${v.p === 'tiktok' ? TT : IG}${v.views ? fmt(v.views) : ''}</div>
+    <div class="scrub">${(v.frames.length ? ['thumb', ...v.frames] : ['thumb']).map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>
+    <div class="tag">${label}</div><div class="who"><img src="media/pfp/${v.h}.webp" alt="">@${v.h}</div></div>`;
+}
+async function catchInto(id, data) {
+  const q = Q[id], vids = q.order ? q.order.map(x => data.videos.find(v => v.id === x)) : data.videos.slice();
+  const sl = slots(vids.length + (q.total ? 1 : 0));
+  // take the matching tiles that are on screen; the rest of the flow flies past and fades
+  const used = new Set();
+  vids.forEach((v, i) => {
+    let t = tiles.find(t => !t.caught && t.v.id === v.id && +t.el.style.opacity > .15);
+    if (!t) { t = tiles.find(t => !t.caught && !used.has(t) && t.v.q !== id && +t.el.style.opacity > .1) || tiles.find(t => !t.caught); t.v = v; t.img.src = `media/${v.id}/thumb.webp`; }
+    used.add(t); t.caught = true; t.cv = v;
+    t.el.insertAdjacentHTML('beforeend', cardHTML(v, id));
+    const g = sl[i];
+    setTimeout(() => {
+      t.el.classList.add('fly'); t.el.style.zIndex = 200 - i; t.el.style.opacity = 1;
+      requestAnimationFrame(() => { t.el.style.width = g.w + 'px'; t.el.style.height = g.h + 'px'; t.el.style.transform = `translate3d(${g.x}px,${g.y}px,0) rotate(0deg) scale(1)`; });
+      setTimeout(() => { t.el.classList.add('card'); bindScrub(t); }, 950);
+    }, i * 32);
+  });
+  wallFade(0);
+  if (q.total) { const g = sl[vids.length], m = document.createElement('div'); m.className = 'more'; m.id = 'more';
+    Object.assign(m.style, { left: g.x + 'px', top: g.y + 'px', width: g.w + 'px', height: g.h + 'px' });
+    m.innerHTML = `<b>+${(q.total - vids.length).toLocaleString('en')}</b>more videos`; document.body.appendChild(m); setTimeout(() => m.style.opacity = 1, 900 + vids.length * 32); }
+  setTimeout(() => { mode = 'results'; $('q').placeholder = 'Ask a follow-up — which creators drove the most views?'; }, 1300);
+}
+function wallFade(a) { fadeTarget = a; }
+function bindScrub(t) {
+  const fr = ['thumb', ...t.cv.frames], bars = t.el.querySelectorAll('.scrub i'); if (fr.length < 2) return;
+  fr.forEach(f => { const i = new Image(); i.src = `media/${t.cv.id}/${f}.webp`; });
+  t.el.onpointermove = e => { const r = t.el.getBoundingClientRect(), k = Math.min(fr.length - 1, Math.floor((e.clientX - r.left) / r.width * fr.length)); t.img.src = `media/${t.cv.id}/${fr[k]}.webp`; bars.forEach((b, j) => b.classList.toggle('on', j === k)); };
+  t.el.onpointerleave = () => { t.img.src = `media/${t.cv.id}/thumb.webp`; bars.forEach((b, j) => b.classList.toggle('on', !j)); };
+}
+function reset() {
+  if (mode !== 'results') return; mode = 'wall';
+  document.body.classList.remove('docked'); $('back').classList.remove('on'); $('more')?.remove();
+  $('sent').innerHTML = ''; $('sent').style.fontSize = ''; $('hero').style.top = '';
+  const l1 = document.querySelector('.l1'); l1.style.opacity = 1; l1.style.filter = 'none';
+  for (const t of tiles) { if (t.caught) { t.caught = false; t.el.className = 't'; t.el.querySelector('.info')?.remove(); t.el.style.width = t.el.style.height = ''; t.el.onpointermove = t.el.onpointerleave = null; spawn(t, .55 + Math.random() * .45); } }
+  wallA = 0; wallFade(1); head(theme);
+}
+function toast(msg) { const t = $('toast'); t.innerHTML = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2600); }
+function route(text) {
+  const s = text.toLowerCase();
+  return /matcha/.test(s) ? 'Q1' : /sephora/.test(s) ? 'Q2' : /jordan|nike|sneaker|shoe/.test(s) ? 'Q3' : /champagne|f1|formula|podium/.test(s) ? 'Q4' : null;
+}
+$('bar').onsubmit = e => { e.preventDefault(); const v = $('q').value.trim();
+  if (mode === 'results') { toast('Demo preview <i>— follow-ups run on real accounts</i>'); return; }
+  const id = v ? route(v) : theme; if (id) run(id); else toast('Demo preview <i>— try matcha, Sephora, Air Jordans or F1</i>'); };
+$('back').onclick = reset;
+document.querySelectorAll('[data-t]').forEach(a => a.onclick = () => toast('Demo preview <i>— available on real accounts</i>'));
+['focus', 'pointerdown', 'keydown'].forEach(ev => $('q').addEventListener(ev, () => { autoOn = false; }));
+
+fetch('data.json').then(r => r.json()).then(async d => {
+  DATA = d; ALL = d.queries.flatMap(q => q.videos.map(v => ({ ...v, q: q.id })));
+  $('sugs').innerHTML = Object.entries(Q).map(([id, q]) => `<button class="sug" data-q="${id}">${q.sug}</button>`).join('');
+  $('sugs').onclick = e => { const id = e.target.dataset.q; if (id) { autoOn = false; run(id); } };
+  initWall(); head('Q1');
+  if (!AUTO) return;
+  await wait(1400); if (!autoOn) return; head('Q2');
+  await wait(1400); if (!autoOn) return; head('Q3');
+  await wait(800); if (!autoOn) return;
+  if (await ghost(DATA.queries[2].prompt)) { await wait(300); if (autoOn && mode === 'wall') run('Q3'); }
+});
+</script></body></html>
